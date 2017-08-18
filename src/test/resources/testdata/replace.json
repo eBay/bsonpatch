@@ -3,7 +3,7 @@
         {
             "op": [{ "op": "replace", "path": "/a" }],
             "node": { "a": 0 },
-            "type": "InvalidJsonPatchException",
+            "type": "InvalidBsonPatchException",
             "message": "missing 'value' field"
         },
         {

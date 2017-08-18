@@ -1,7 +1,6 @@
-release.sh
 target/*
-*.ipr
-*.iml
-*.iws
-*.idea
-flipkart-boot.log
+.classpath
+.project
+.settings/*
+.DS_Store
+/target/

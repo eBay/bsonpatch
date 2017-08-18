@@ -3,7 +3,7 @@
         {
             "op": [{ "op": "add", "path": "/a" }],
             "node": {},
-            "type": "JsonPatchApplicationException",
+            "type": "BsonPatchApplicationException",
             "message": "missing 'value' field"
         }
     ],

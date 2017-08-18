@@ -13,7 +13,7 @@
         {
             "op": [{ "op": "move", "path": "/b/c" }],
             "node": { "a": "b" },
-            "type": "InvalidJsonPatchException",
+            "type": "InvalidBsonPatchException",
             "message": "missing 'from' field"
         },
         {

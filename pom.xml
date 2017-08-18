@@ -2,27 +2,27 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.flipkart.zjsonpatch</groupId>
-    <artifactId>zjsonpatch</artifactId>
+    <groupId>org.ebayopensource.bsonpatch</groupId>
+    <artifactId>bsonpatch</artifactId>
     <version>0.3.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>zjsonpatch</name>
-    <description>Java Library to find / apply JSON Patches according to RFC 6902</description>
-    <url>https://github.com/flipkart-incubator/zjsonpatch/</url>
+    <name>bsonpatch</name>
+    <description>Java Library to find / apply JSON Patches according to RFC 6902 against BsonValues</description>
+    <url>https://github.corp.ebay.com/monstor-cdc/bsonpatch/</url>
 
     <scm>
-        <connection>scm:git:https://github.com/flipkart-incubator/zjsonpatch.git</connection>
-        <developerConnection>scm:git:https://github.com/flipkart-incubator/zjsonpatch.git</developerConnection>
+        <connection>scm:git:https://github.corp.ebay.com/monstor-cdc/bsonpatch.git</connection>
+        <developerConnection>scm:git:git@github.corp.ebay.com:monstor-cdc/bsonpatch.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/flipkart-incubator/zjsonpatch</url>
+        <url>https://github.corp.ebay.com/monstor-cdc/bsonpatch</url>
     </scm>
 
     <developers>
         <developer>
-            <id>vishwakarma</id>
-            <name>Gopi Vishwakarma</name>
-            <email>vishwakarma.iiita@gmail.com</email>
+            <id>ddouglas</id>
+            <name>Dan Douglas</name>
+            <email>ddouglas@ebay.com</email>
         </developer>
     </developers>
 
@@ -36,7 +36,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.8.5</jackson.version>
     </properties>
 
     <build>
@@ -78,60 +77,30 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.3</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>release</releaseProfiles>
-                    <goals>deploy</goals>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
+    
     <dependencies>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>3.5.0</version>
+		</dependency>
+		<!-- For functional operators used in computing diffs -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>18.0</version>
         </dependency>
+        
+        <!--  included to compute longest common subsequence of arrays in diff calculation -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.1</version>
+        </dependency>
+        
+        <!-- For IOUtils.toString(inputStream, charset) and StringBuilderWriter -->
         <dependency>
             <scope>test</scope>
             <groupId>commons-io</groupId>
@@ -144,20 +113,16 @@
             <artifactId>junit</artifactId>
             <version>4.12</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
-        </dependency>
     </dependencies>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
+    
+	<distributionManagement>
+		<repository>
+			<id>raptor.releases</id>
+			<url>http://ebaycentral.qa.ebay.com/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>raptor.snapshots</id>
+			<url>http://ebaycentral.qa.ebay.com/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>
