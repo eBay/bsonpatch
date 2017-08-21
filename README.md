@@ -25,11 +25,12 @@ The code here was ported (copied, renamed, repackaged, modified) from the [zjson
 Add following to `<dependencies/>` section of your pom.xml -
 
 ```xml
-<groupId>org.ebayopensource.bsonpatch</groupId>
-<artifactId>bsonpatch</artifactId>
-<version>{version}</version>
+<dependency>
+  <groupId>org.ebayopensource.bsonpatch</groupId>
+  <artifactId>bsonpatch</artifactId>
+  <version>0.3.4</version>
+</dependency>
 ```
-- Available on maven cental repository
 
 ## API Usage
 
