@@ -26,7 +26,7 @@ Add following to `<dependencies/>` section of your pom.xml -
 
 ```xml
 <dependency>
-  <groupId>org.ebayopensource.bsonpatch</groupId>
+  <groupId>com.ebay.bsonpatch</groupId>
   <artifactId>bsonpatch</artifactId>
   <version>0.3.4</version>
 </dependency>
