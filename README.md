@@ -89,14 +89,9 @@ a new instance with the patch applied, leaving the `source` unchanged.
 * **Contributing**: Pull requests are welcome!
   * Read [`CONTRIBUTING.md`](CONTRIBUTING.md) 
   * Submit [github issues](https://github.corp.ebay.com/monstor-cdc/bsonpatch/issues) for any feature enhancements, bugs or documentation problems
-  * Discuss [#bsonpatch](https://ebay-eng.slack.com/messages/C76A992JG)
     
 * **Support**: Questions/comments can posted as [github issues](https://github.corp.ebay.com/monstor-cdc/bsonpatch/issues)
 
 ## Maintainers
 
-* [Dan Douglas](https://github.corp.ebay.com/ddouglas) (Slack: [@ddouglas](https://ebay-eng.slack.com/team/W3YMTDCKX))
-
-
-
-
+* [Dan Douglas](https://github.com/dandoug) 
