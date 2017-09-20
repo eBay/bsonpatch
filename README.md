@@ -84,5 +84,19 @@ a new instance with the patch applied, leaving the `source` unchanged.
 1. 100+ selective hardcoded different input jsons , with their driver test classes present under /test directory.
 2. Apart from selective input, a deterministic random json generator is present under ( TestDataGenerator.java ),  and its driver test class method is JsonDiffTest.testGeneratedJsonDiff().
 
+## Get Involved
+
+* **Contributing**: Pull requests are welcome!
+  * Read [`CONTRIBUTING.md`](CONTRIBUTING.md) 
+  * Submit [github issues](https://github.corp.ebay.com/monstor-cdc/bsonpatch/issues) for any feature enhancements, bugs or documentation problems
+  * Discuss [#bsonpatch](https://ebay-eng.slack.com/messages/C76A992JG)
+    
+* **Support**: Questions/comments can posted as [github issues](https://github.corp.ebay.com/monstor-cdc/bsonpatch/issues)
+
+## Maintainers
+
+* [Dan Douglas](https://github.corp.ebay.com/ddouglas) (Slack: [@ddouglas](https://ebay-eng.slack.com/team/W3YMTDCKX))
+
+
 
 
