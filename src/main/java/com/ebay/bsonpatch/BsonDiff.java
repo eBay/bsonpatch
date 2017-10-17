@@ -65,14 +65,20 @@ public final class BsonDiff {
          * generating diffs in the order of their occurrence
          */
         generateDiffs(diffs, path, source, target);
-        /*
-         * Merging remove & add to move operation
-         */
-        compactDiffs(diffs);
-        /*
-         * Introduce copy operation
-         */
-        introduceCopyOperation(source, target, diffs);
+
+        if (!flags.contains(DiffFlags.OMIT_MOVE_OPERATION)) {        
+	        /*
+	         * Merging remove & add to move operation
+	         */
+	        compactDiffs(diffs);
+        }
+
+        if (!flags.contains(DiffFlags.OMIT_COPY_OPERATION)) {
+	        /*
+	         * Introduce copy operation
+	         */
+	        introduceCopyOperation(source, target, diffs);
+        }
 
         return getBsonNodes(diffs, flags);
     }

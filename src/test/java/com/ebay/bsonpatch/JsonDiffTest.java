@@ -27,6 +27,7 @@ import java.util.Random;
 import org.apache.commons.io.IOUtils;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
+import org.bson.BsonInt32;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.junit.Assert;
@@ -111,4 +112,32 @@ public class JsonDiffTest {
         Assert.assertEquals("/field", diff.get(0).asDocument().getString("path").getValue());
         Assert.assertEquals("value", diff.get(0).asDocument().getString("value").getValue());
     }
+
+    @Test
+    public void testRenderedOperationsExceptMoveAndCopy() throws Exception {
+    	BsonDocument source = new BsonDocument();
+    	source.put("age", new BsonInt32(10));
+    	BsonDocument target = new BsonDocument();
+    	target.put("height", new BsonInt32(10));
+
+        EnumSet<DiffFlags> flags = DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone(); //only have ADD, REMOVE, REPLACE, Don't normalize operations into MOVE & COPY
+
+        BsonArray diff = BsonDiff.asBson(source, target, flags);
+
+        System.out.println(source);
+        System.out.println(target);
+        System.out.println(diff);
+
+        for (BsonValue d : diff) {
+            Assert.assertNotEquals(Operation.MOVE.rfcName(), d.asDocument().getString("op").getValue());
+            Assert.assertNotEquals(Operation.COPY.rfcName(), d.asDocument().getString("op").getValue());
+        }
+
+        BsonValue targetPrime = BsonPatch.apply(diff, source);
+        System.out.println(targetPrime);
+        Assert.assertTrue(target.equals(targetPrime));
+
+
+    }
+    
 }
