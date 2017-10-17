@@ -20,7 +20,7 @@ The code here was ported (copied, renamed, repackaged, modified) from the [zjson
 
 ### How to use:
 
-### Current Version : 0.3.4
+### Current Version : 0.3.6
 
 Add following to `<dependencies/>` section of your pom.xml -
 
@@ -28,7 +28,7 @@ Add following to `<dependencies/>` section of your pom.xml -
 <dependency>
   <groupId>com.ebay.bsonpatch</groupId>
   <artifactId>bsonpatch</artifactId>
-  <version>0.3.4</version>
+  <version>0.3.6</version>
 </dependency>
 ```
 
