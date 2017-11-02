@@ -1,128 +1,160 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ebay.bsonpatch</groupId>
-    <artifactId>bsonpatch</artifactId>
-    <version>0.3.6-SNAPSHOT</version>
-    <packaging>jar</packaging>
-
-    <name>bsonpatch</name>
-    <description>Java Library to find / apply JSON Patches according to RFC 6902 against BsonValues</description>
-    <url>https://github.corp.ebay.com/monstor-cdc/bsonpatch/</url>
-
-    <scm>
-        <connection>scm:git:https://github.corp.ebay.com/monstor-cdc/bsonpatch.git</connection>
-        <developerConnection>scm:git:git@github.corp.ebay.com:monstor-cdc/bsonpatch.git</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://github.corp.ebay.com/monstor-cdc/bsonpatch</url>
-    </scm>
-
-    <developers>
-        <developer>
-            <id>ddouglas</id>
-            <name>Dan Douglas</name>
-            <email>ddouglas@ebay.com</email>
-        </developer>
-    </developers>
-
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <showDeprecation>true</showDeprecation>
-                    <showWarnings>true</showWarnings>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-    
-    <dependencies>
+	<groupId>com.ebay.bsonpatch</groupId>
+	<artifactId>bsonpatch</artifactId>
+	<version>0.3.6</version>
+	<packaging>jar</packaging>
+	
+	<name>${project.groupId}:${project.artifactId}</name>
+	<description>Java Library to find / apply JSON Patches according to RFC 6902 against BsonValues</description>
+	<url>https://github.com/ebay/bsonpatch/</url>
+	
+	<scm>
+		<connection>scm:git:git://github.com/eBay/bsonpatch.git</connection>
+		<developerConnection>scm:git:ssh://github.com/eBay/bsonpatch.git</developerConnection>
+		<url>https://github.com/ebay/bsonpatch</url>
+		<tag>HEAD</tag>
+	</scm>
+	
+	<developers>
+		<developer>
+			<id>dandoug</id>
+			<name>Dan Douglas</name>
+			<email>ddouglas@skibums.org</email>
+			<organization>eBay</organization>
+			<organizationUrl>https://www.ebay.com</organizationUrl>
+		</developer>
+	</developers>
+	
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<showDeprecation>true</showDeprecation>
+					<showWarnings>true</showWarnings>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<profiles>
+		<profile>
+			<id>release</id>
+			<distributionManagement>
+				<snapshotRepository>
+					<id>ossrh</id>
+					<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+				</snapshotRepository>
+			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.8</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>false</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.4</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	
+	<dependencies>
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
 			<version>3.5.0</version>
 		</dependency>
 		<!-- For functional operators used in computing diffs -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>20.0</version>
-        </dependency>
-        
-        <!--  included to compute longest common subsequence of arrays in diff calculation -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
-        </dependency>
-        
-        <!-- For IOUtils.toString(inputStream, charset) and StringBuilderWriter -->
-        <dependency>
-            <scope>test</scope>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.5</version>
-        </dependency>
-        <dependency>
-            <scope>test</scope>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-        </dependency>
-    </dependencies>
-    
-	<distributionManagement>
-		<repository>
-			<id>raptor.releases</id>
-			<url>http://ebaycentral.qa.ebay.com/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>raptor.snapshots</id>
-			<url>http://ebaycentral.qa.ebay.com/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>20.0</version>
+		</dependency>
+		<!--  included to compute longest common subsequence of arrays in diff calculation -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.1</version>
+		</dependency>
+		<!-- For IOUtils.toString(inputStream, charset) and StringBuilderWriter -->
+		<dependency>
+			<scope>test</scope>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+			<scope>test</scope>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+		</dependency>
+	</dependencies>
 </project>
