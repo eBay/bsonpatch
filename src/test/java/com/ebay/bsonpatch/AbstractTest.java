@@ -19,9 +19,9 @@
 
 package com.ebay.bsonpatch;
 
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -62,14 +62,16 @@ public abstract class AbstractTest {
     private void testOperation() throws Exception {
         BsonDocument node = p.getNode();
 
-        BsonValue first = node.get("node");
-        BsonValue second = node.get("expected");
+        BsonValue doc = node.get("node");
+        BsonValue expected = node.get("expected");
         BsonArray patch = node.getArray("op");
         String message = node.containsKey("message") ? node.getString("message").getValue() : "";
 
-        BsonValue secondPrime = BsonPatch.apply(patch, first);
-
-        assertThat(message, secondPrime, equalTo(second));
+        BsonValue result = BsonPatch.apply(patch, doc);
+        String failMessage = "The following test failed: \n" +
+             "message: " + message + '\n' +
+             "at: " + p.getSourceFile();
+        assertEquals(failMessage, expected, result);
     }
 
     private Class<?> exceptionType(String type) throws ClassNotFoundException {

@@ -27,23 +27,9 @@ import org.bson.BsonArray;
 import org.bson.BsonNull;
 import org.bson.BsonValue;
 
-import com.google.common.base.Function;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
 public final class BsonPatch {
 
-    private static final DecodePathFunction DECODE_PATH_FUNCTION = new DecodePathFunction();
-
     private BsonPatch() {}
-
-    private final static class DecodePathFunction implements Function<String, String> {
-        @Override
-        public String apply(String path) {
-            return path.replaceAll("~1", "/").replaceAll("~0", "~"); // see http://tools.ietf.org/html/rfc6901#section-4
-        }
-    }
 
     private static BsonValue getPatchAttr(BsonValue bsonNode, String attr) {
     	BsonValue child = bsonNode.asDocument().get(attr);
@@ -68,7 +54,7 @@ public final class BsonPatch {
         	BsonValue bsonNode = operations.next();
             if (!bsonNode.isDocument()) throw new InvalidBsonPatchException("Invalid BSON Patch payload (not an object)");
             Operation operation = Operation.fromRfcName(getPatchAttr(bsonNode, Constants.OP).asString().getValue().replaceAll("\"", ""));
-            List<String> path = getPath(getPatchAttr(bsonNode, Constants.PATH));
+            List<String> path = PathUtils.getPath(getPatchAttr(bsonNode, Constants.PATH));
 
             switch (operation) {
                 case REMOVE: {
@@ -97,13 +83,13 @@ public final class BsonPatch {
                 }
 
                 case MOVE: {
-                    List<String> fromPath = getPath(getPatchAttr(bsonNode, Constants.FROM));
+                    List<String> fromPath = PathUtils.getPath(getPatchAttr(bsonNode, Constants.FROM));
                     processor.move(fromPath, path);
                     break;
                 }
 
                 case COPY: {
-                    List<String> fromPath = getPath(getPatchAttr(bsonNode, Constants.FROM));
+                    List<String> fromPath = PathUtils.getPath(getPatchAttr(bsonNode, Constants.FROM));
                     processor.copy(fromPath, path);
                     break;
                 }
@@ -130,7 +116,7 @@ public final class BsonPatch {
     }
 
     public static BsonValue apply(BsonArray patch, BsonValue source, EnumSet<CompatibilityFlags> flags) throws BsonPatchApplicationException {
-        CopyingApplyProcessor processor = new CopyingApplyProcessor(source);
+        CopyingApplyProcessor processor = new CopyingApplyProcessor(source, flags);
         process(patch, processor, flags);
         return processor.result();
     }
@@ -139,17 +125,13 @@ public final class BsonPatch {
         return apply(patch, source, CompatibilityFlags.defaults());
     }
 
-    public static void applyInPlace(BsonArray patch, BsonValue source){
+    public static void applyInPlace(BsonArray patch, BsonValue source) {
         applyInPlace(patch, source, CompatibilityFlags.defaults());
     }
 
-    public static void applyInPlace(BsonArray patch, BsonValue source, EnumSet<CompatibilityFlags> flags){
-        InPlaceApplyProcessor processor = new InPlaceApplyProcessor(source);
+    public static void applyInPlace(BsonArray patch, BsonValue source, EnumSet<CompatibilityFlags> flags) {
+        InPlaceApplyProcessor processor = new InPlaceApplyProcessor(source, flags);
         process(patch, processor, flags);
     }
 
-    private static List<String> getPath(BsonValue path) {
-        List<String> paths = Splitter.on('/').splitToList(path.asString().getValue().replaceAll("\"", ""));
-        return Lists.newArrayList(Iterables.transform(paths, DECODE_PATH_FUNCTION));
-    }
 }

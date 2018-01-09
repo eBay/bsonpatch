@@ -19,37 +19,29 @@
 
 package com.ebay.bsonpatch;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonValue;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
-
 class InPlaceApplyProcessor implements BsonPatchProcessor {
 
     private BsonValue target;
+    private EnumSet<CompatibilityFlags> flags;
 
     InPlaceApplyProcessor(BsonValue target) {
-        this.target = target;
+    	this(target, CompatibilityFlags.defaults());
     }
+
+    InPlaceApplyProcessor(BsonValue target, EnumSet<CompatibilityFlags> flags) {
+        this.target = target;
+        this.flags = flags;
+    }    
 
     public BsonValue result() {
         return target;
-    }
-
-    private static final EncodePathFunction ENCODE_PATH_FUNCTION = new EncodePathFunction();
-
-    private final static class EncodePathFunction implements Function<Object, String> {
-        @Override
-        public String apply(Object object) {
-            String path = object.toString(); // see http://tools.ietf.org/html/rfc6901#section-4
-            return path.replaceAll("~", "~0").replaceAll("/", "~1");
-        }
     }
 
     @Override
@@ -65,7 +57,7 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
     public void copy(List<String> fromPath, List<String> toPath) {
         BsonValue parentNode = getParentNode(fromPath, Operation.COPY);
         String field = fromPath.get(fromPath.size() - 1).replaceAll("\"", "");
-        BsonValue valueNode =  parentNode.isArray() ? parentNode.asArray().get(Integer.parseInt(field)) : parentNode.asDocument().get(field);
+        BsonValue valueNode = parentNode.isArray() ? parentNode.asArray().get(Integer.parseInt(field)) : parentNode.asDocument().get(field);
         add(toPath, valueNode);
     }
 
@@ -77,35 +69,34 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
         	BsonValue parentNode = getParentNode(path, Operation.TEST);
             String fieldToReplace = path.get(path.size() - 1).replaceAll("\"", "");
             if (fieldToReplace.equals("") && path.size() == 1)
-                if(target.equals(value)){
+                if (target.equals(value)) {
                     target = value;
-                }else {
+                } else {
                     error(Operation.TEST, "value mismatch");
                 }
             else if (!parentNode.isDocument() && !parentNode.isArray())
-                error(Operation.TEST, "parent is not a container in source, path provided : " + getArrayNodeRepresentation(path) + " | node : " + parentNode);
+                error(Operation.TEST, "parent is not a container in source, path provided : " + PathUtils.getPathRepresentation(path) + " | node : " + parentNode);
             else if (parentNode.isArray()) {
                 final BsonArray target = parentNode.asArray();
                 String idxStr = path.get(path.size() - 1);
 
                 if ("-".equals(idxStr)) {
                     // see http://tools.ietf.org/html/rfc6902#section-4.1
-                    if(!target.get(target.size()-1).equals(value)){
+                    if(!target.get(target.size() - 1).equals(value)) {
                         error(Operation.TEST, "value mismatch");
                     }
                 } else {
-                    int idx = arrayIndex(idxStr.replaceAll("\"", ""), target.size());
-                    if(!target.get(idx).equals(value)){
+                    int idx = arrayIndex(idxStr.replaceAll("\"", ""), target.size(), false);
+                    if (!target.get(idx).equals(value)) {
                         error(Operation.TEST, "value mismatch");
                     }
                 }
-            }
-            else {
+            } else {
                 final BsonDocument target = parentNode.asDocument();
                 String key = path.get(path.size() - 1).replaceAll("\"", "");
                 BsonValue actual = target.get(key);
                 if (actual == null)
-                    error(Operation.TEST, "noSuchPath in source, path provided : " + getArrayNodeRepresentation(path));
+                    error(Operation.TEST, "noSuchPath in source, path provided : " + PathUtils.getPathRepresentation(path));
                 else if (!actual.equals(value))
                     error(Operation.TEST, "value mismatch");
             }
@@ -122,7 +113,7 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
             if (fieldToReplace.equals("") && path.size() == 1)
                 target = value;
             else if (!parentNode.isDocument() && !parentNode.isArray())
-                error(Operation.ADD, "parent is not a container in source, path provided : " + getArrayNodeRepresentation(path) + " | node : " + parentNode);
+                error(Operation.ADD, "parent is not a container in source, path provided : " + PathUtils.getPathRepresentation(path) + " | node : " + parentNode);
             else if (parentNode.isArray())
                 addToArray(path, value, parentNode);
             else
@@ -144,7 +135,7 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
             // see http://tools.ietf.org/html/rfc6902#section-4.1
             target.add(value);
         } else {
-            int idx = arrayIndex(idxStr.replaceAll("\"", ""), target.size());
+            int idx = arrayIndex(idxStr.replaceAll("\"", ""), target.size(), false);
             target.add(idx, value);
         }
     }
@@ -156,14 +147,14 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
         } else {
             BsonValue parentNode = getParentNode(path, Operation.REPLACE);
             String fieldToReplace = path.get(path.size() - 1).replaceAll("\"", "");
-            if (Strings.isNullOrEmpty(fieldToReplace) && path.size() == 1)
+            if (isNullOrEmpty(fieldToReplace) && path.size() == 1)	
                 target = value;
             else if (parentNode.isDocument())
                 parentNode.asDocument().put(fieldToReplace, value);
             else if (parentNode.isArray())
-                parentNode.asArray().set(arrayIndex(fieldToReplace, parentNode.asArray().size() - 1), value);
+                parentNode.asArray().set(arrayIndex(fieldToReplace, parentNode.asArray().size() - 1, false), value);
             else
-                error(Operation.REPLACE, "noSuchPath in source, path provided : " + getArrayNodeRepresentation(path));
+                error(Operation.REPLACE, "noSuchPath in source, path provided : " + PathUtils.getPathRepresentation(path));
         }
     }
 
@@ -176,10 +167,17 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
             String fieldToRemove = path.get(path.size() - 1).replaceAll("\"", "");
             if (parentNode.isDocument())
                 parentNode.asDocument().remove(fieldToRemove);
-            else if (parentNode.isArray())
-                parentNode.asArray().remove(arrayIndex(fieldToRemove, parentNode.asArray().size() - 1));
-            else
-                error(Operation.REMOVE, "noSuchPath in source, path provided : " + getArrayNodeRepresentation(path));
+            else if (parentNode.isArray()) {
+            	// If path specifies a non-existent array element and the REMOVE_NONE_EXISTING_ARRAY_ELEMENT flag is not set, then
+            	// arrayIndex will throw an error.
+            	int i = arrayIndex(fieldToRemove, parentNode.asArray().size() - 1, flags.contains(CompatibilityFlags.REMOVE_NONE_EXISTING_ARRAY_ELEMENT));
+            	// However, BsonArray.remove(int) is not very forgiving, so we need to avoid making the call if the index is past the end
+            	// otherwise, we'll get an IndexArrayOutOfBounds error
+            	if (i < parentNode.asArray().size()) {
+            		parentNode.asArray().remove(i);
+            	}
+            } else
+                error(Operation.REMOVE, "noSuchPath in source, path provided : " + PathUtils.getPathRepresentation(path));
         }
     }
 
@@ -190,7 +188,8 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
     private BsonValue getParentNode(List<String> fromPath, Operation forOp) {
         List<String> pathToParent = fromPath.subList(0, fromPath.size() - 1); // would never by out of bound, lets see
         BsonValue node = getNode(target, pathToParent, 1);
-        if (node == null) error(forOp, "noSuchPath in source, path provided: " + getArrayNodeRepresentation(fromPath));
+        if (node == null)
+        	error(forOp, "noSuchPath in source, path provided: " + PathUtils.getPathRepresentation(fromPath));
         return node;
     }
 
@@ -220,7 +219,7 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
         }
     }
 
-    private int arrayIndex(String s, int max) {
+    private int arrayIndex(String s, int max, boolean allowNoneExisting) {
         int index;
         try {
             index = Integer.parseInt(s);
@@ -230,12 +229,13 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
         if (index < 0) {
             throw new BsonPatchApplicationException("index Out of bound, index is negative");
         } else if (index > max) {
-            throw new BsonPatchApplicationException("index Out of bound, index is greater than " + max);
+        	if (!allowNoneExisting)
+        		throw new BsonPatchApplicationException("index Out of bound, index is greater than " + max);
         }
         return index;
     }
-    private static String getArrayNodeRepresentation(List<String> path) {
-        return Joiner.on('/').appendTo(new StringBuilder().append('/'),
-                Iterables.transform(path, ENCODE_PATH_FUNCTION)).toString();
+    
+    private boolean isNullOrEmpty(String string) {
+        return string == null || string.length() == 0;
     }
 }

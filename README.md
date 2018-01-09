@@ -20,7 +20,7 @@ The code here was ported (copied, renamed, repackaged, modified) from the [zjson
 
 ### How to use:
 
-### Current Version : 0.3.6
+### Current Version : 0.4.1
 
 Add following to `<dependencies/>` section of your pom.xml -
 
@@ -28,7 +28,7 @@ Add following to `<dependencies/>` section of your pom.xml -
 <dependency>
   <groupId>com.ebay.bsonpatch</groupId>
   <artifactId>bsonpatch</artifactId>
-  <version>0.3.6</version>
+  <version>0.4.1</version>
 </dependency>
 ```
 
@@ -50,17 +50,17 @@ The algorithm which computes this JsonPatch currently generates following operat
  - COPY
  - TEST
  
- ## To turn off MOVE & COPY Operations
-```xml
-EnumSet<DiffFlags> flags = DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone()
-BsonArray patch = BsonDiff.asJson(BsonValue source, BsonValue target, flags)
-```
-
 ### Apply Json Patch
 ```xml
 BsonValue target = BsonPatch.apply(BsonArray patch, BsonValue source);
 ```
 Given a Patch, it apply it to source Bson and return a target Bson which can be ( Bson object or array or value ). This operation  performed on a clone of source Bson ( thus, source Bson is untouched and can be used further). 
+
+ ## To turn off MOVE & COPY Operations
+```xml
+EnumSet<DiffFlags> flags = DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone()
+BsonArray patch = BsonDiff.asJson(BsonValue source, BsonValue target, flags)
+```
 
 ### Example
 First Json
@@ -88,6 +88,8 @@ a new instance with the patch applied, leaving the `source` unchanged.
 ### Tests:
 1. 100+ selective hardcoded different input jsons , with their driver test classes present under /test directory.
 2. Apart from selective input, a deterministic random json generator is present under ( TestDataGenerator.java ),  and its driver test class method is JsonDiffTest.testGeneratedJsonDiff().
+
+#### *** Tests can only show presence of bugs and not their absence ***
 
 ## Get Involved
 

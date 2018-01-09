@@ -6,7 +6,7 @@
 
 	<groupId>com.ebay.bsonpatch</groupId>
 	<artifactId>bsonpatch</artifactId>
-	<version>0.3.6-SNAPSHOT</version>
+	<version>0.4.1</version>
 	<packaging>jar</packaging>
 	
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -129,19 +129,7 @@
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
-			<version>3.5.0</version>
-		</dependency>
-		<!-- For functional operators used in computing diffs -->
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>20.0</version>
-		</dependency>
-		<!--  included to compute longest common subsequence of arrays in diff calculation -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
-			<version>4.1</version>
+			<version>3.6.1</version>
 		</dependency>
 		<!-- For IOUtils.toString(inputStream, charset) and StringBuilderWriter -->
 		<dependency>

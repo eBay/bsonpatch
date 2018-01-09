@@ -20,6 +20,7 @@
 package com.ebay.bsonpatch;
 
 import static com.ebay.bsonpatch.CompatibilityFlags.MISSING_VALUES_AS_NULLS;
+import static com.ebay.bsonpatch.CompatibilityFlags.REMOVE_NONE_EXISTING_ARRAY_ELEMENT;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -35,11 +36,13 @@ public class CompatibilityTest {
 
     BsonArray addNodeWithMissingValue;
     BsonArray replaceNodeWithMissingValue;
+    BsonArray removeNoneExistingArrayElement;
 
     @Before
     public void setUp() throws Exception {
         addNodeWithMissingValue = BsonArray.parse("[{\"op\":\"add\",\"path\":\"a\"}]");
         replaceNodeWithMissingValue = BsonArray.parse("[{\"op\":\"replace\",\"path\":\"a\"}]");
+        removeNoneExistingArrayElement = BsonArray.parse("[{\"op\": \"remove\",\"path\": \"/b/0\"}]");
     }
 
     @Test
@@ -66,4 +69,12 @@ public class CompatibilityTest {
     public void withFlagReplaceNodeWithMissingValueShouldValidateCorrectly() {
         BsonPatch.validate(addNodeWithMissingValue, EnumSet.of(MISSING_VALUES_AS_NULLS));
     }
+    
+    @Test
+    public void withFlagIgnoreRemoveNoneExistingArrayElement() throws IOException {
+    	BsonDocument source = BsonDocument.parse("{\"b\": []}");
+    	BsonDocument expected = BsonDocument.parse("{\"b\": []}");
+    	BsonDocument result = BsonPatch.apply(removeNoneExistingArrayElement, source, EnumSet.of(REMOVE_NONE_EXISTING_ARRAY_ELEMENT)).asDocument();
+    	assertThat(result, equalTo(expected));
+     }
 }

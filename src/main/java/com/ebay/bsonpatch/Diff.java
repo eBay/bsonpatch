@@ -28,11 +28,13 @@ class Diff {
     private final List<Object> path;
     private final BsonValue value;
     private List<Object> toPath; //only to be used in move operation
+    private final BsonValue srcValue; // only used in replace operation
 
     Diff(Operation operation, List<Object> path, BsonValue value) {
         this.operation = operation;
         this.path = path;
         this.value = value;
+        this.srcValue = null;
     }
 
     Diff(Operation operation, List<Object> fromPath, List<Object> toPath) {
@@ -40,7 +42,15 @@ class Diff {
         this.path = fromPath;
         this.toPath = toPath;
         this.value = null;
+        this.srcValue = null;
     }
+    
+    Diff(Operation operation, List<Object> path, BsonValue srcValue, BsonValue value) {
+        this.operation = operation;
+        this.path = path;
+        this.value = value;
+        this.srcValue = srcValue;
+    }    
 
     public Operation getOperation() {
         return operation;
@@ -57,8 +67,16 @@ class Diff {
     public static Diff generateDiff(Operation replace, List<Object> path, BsonValue target) {
         return new Diff(replace, path, target);
     }
+    
+    public static Diff generateDiff(Operation replace, List<Object> path, BsonValue source, BsonValue target) {
+        return new Diff(replace, path, source, target);
+    }    
 
     List<Object> getToPath() {
         return toPath;
     }
+    
+    public BsonValue getSrcValue(){
+        return srcValue;
+    }    
 }

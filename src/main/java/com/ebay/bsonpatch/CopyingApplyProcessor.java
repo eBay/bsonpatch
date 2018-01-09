@@ -22,12 +22,17 @@ package com.ebay.bsonpatch;
 import org.bson.BsonBinary;
 import org.bson.BsonJavaScriptWithScope;
 import org.bson.BsonValue;
+import java.util.EnumSet;
 
 class CopyingApplyProcessor extends InPlaceApplyProcessor {
 
     CopyingApplyProcessor(BsonValue target) {
-        super(deepCopy(target));
+        this(target, CompatibilityFlags.defaults());
     }
+    
+    CopyingApplyProcessor(BsonValue target, EnumSet<CompatibilityFlags> flags) {
+        super(deepCopy(target), flags);
+     }    
     
     static BsonValue deepCopy(BsonValue source) {
         BsonValue result;

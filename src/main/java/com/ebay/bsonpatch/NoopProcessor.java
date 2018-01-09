@@ -23,9 +23,11 @@ import java.util.List;
 
 import org.bson.BsonValue;
 
-/** A JSON patch processor that does nothing, intended for testing and validation. */
+/** 
+ * A JSON patch processor that does nothing, intended for testing and validation. 
+ */
 public class NoopProcessor implements BsonPatchProcessor {
-    static NoopProcessor INSTANCE;
+    static final NoopProcessor INSTANCE;
     static {
         INSTANCE = new NoopProcessor();
     }

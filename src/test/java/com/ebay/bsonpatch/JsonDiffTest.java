@@ -51,16 +51,16 @@ public class JsonDiffTest {
             BsonValue first = jsonNode.get(i).asDocument().get("first");
             BsonValue second = jsonNode.get(i).asDocument().get("second");
 
-            System.out.println("Test # " + i);
-            System.out.println(first);
-            System.out.println(second);
+//            System.out.println("Test # " + i);
+//            System.out.println(first);
+//            System.out.println(second);
 
             BsonArray actualPatch = BsonDiff.asBson(first, second);
 
-            System.out.println(actualPatch);
+//            System.out.println(actualPatch);
 
             BsonValue secondPrime = BsonPatch.apply(actualPatch, first);
-            System.out.println(secondPrime);
+//            System.out.println(secondPrime);
             Assert.assertTrue(second.equals(secondPrime));
         }
     }
@@ -73,14 +73,14 @@ public class JsonDiffTest {
             BsonArray second = TestDataGenerator.generate(random.nextInt(10));
 
             BsonArray actualPatch = BsonDiff.asBson(first, second);
-            System.out.println("Test # " + i);
-
-            System.out.println(first);
-            System.out.println(second);
-            System.out.println(actualPatch);
+//            System.out.println("Test # " + i);
+//
+//            System.out.println(first);
+//            System.out.println(second);
+//            System.out.println(actualPatch);
 
             BsonArray secondPrime = BsonPatch.apply(actualPatch, first).asArray();
-            System.out.println(secondPrime);
+//            System.out.println(secondPrime);
             Assert.assertTrue(second.equals(secondPrime));
         }
     }
@@ -124,9 +124,9 @@ public class JsonDiffTest {
 
         BsonArray diff = BsonDiff.asBson(source, target, flags);
 
-        System.out.println(source);
-        System.out.println(target);
-        System.out.println(diff);
+//        System.out.println(source);
+//        System.out.println(target);
+//        System.out.println(diff);
 
         for (BsonValue d : diff) {
             Assert.assertNotEquals(Operation.MOVE.rfcName(), d.asDocument().getString("op").getValue());
@@ -134,7 +134,7 @@ public class JsonDiffTest {
         }
 
         BsonValue targetPrime = BsonPatch.apply(diff, source);
-        System.out.println(targetPrime);
+//        System.out.println(targetPrime);
         Assert.assertTrue(target.equals(targetPrime));
 
 
