@@ -34,7 +34,7 @@ The following guidelines apply to all contributors.
 * The first line should be limited to 50 characters and should not end in a
   period.
 * Subsequent lines should be wrapped at 72 characters.
-* Put `Closes: https://github.corp.ebay.com/monstor-cdc/bsonpatch/issues/XXX` line at the very
+* Put `Closes: https://github.com/eBay/bsonpatch/issues/XXX` line at the very
   end (where `XXX` is the actual issue number) if the proposed change is relevant to a tracked issue.
 
 Note: In Git commits the first line of the commit message has special

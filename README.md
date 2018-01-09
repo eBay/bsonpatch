@@ -8,7 +8,7 @@ The code here was ported (copied, renamed, repackaged, modified) from the [zjson
 - Java Library to find / apply JSON Patches according to RFC 6902.
 - JSON Patch defines a JSON document structure for representing changes to a JSON document.
 - It can be used to avoid sending a whole document when only a part has changed, thus reducing network bandwidth requirements if data (in json format) is required to send across multiple systems over network or in case of multi DC transfer.
-- This library compares two [BsonValue](http://mongodb.github.io/mongo-java-driver/3.5/javadoc/org/bson/BsonValue.html) inputs and produces a [BsonArray](http://mongodb.github.io/mongo-java-driver/3.5/javadoc/org/bson/BsonArray.html) of the changes.
+- This library compares two [BsonValue](http://mongodb.github.io/mongo-java-driver/3.6/javadoc/org/bson/BsonValue.html) inputs and produces a [BsonArray](http://mongodb.github.io/mongo-java-driver/3.6/javadoc/org/bson/BsonArray.html) of the changes.
 
 
 ### Compatible with : Java 6 / 7 / 8
@@ -95,9 +95,9 @@ a new instance with the patch applied, leaving the `source` unchanged.
 
 * **Contributing**: Pull requests are welcome!
   * Read [`CONTRIBUTING.md`](CONTRIBUTING.md) 
-  * Submit [github issues](https://github.corp.ebay.com/monstor-cdc/bsonpatch/issues) for any feature enhancements, bugs or documentation problems
+  * Submit [github issues](https://github.com/eBay/bsonpatch/issues) for any feature enhancements, bugs or documentation problems
     
-* **Support**: Questions/comments can posted as [github issues](https://github.corp.ebay.com/monstor-cdc/bsonpatch/issues)
+* **Support**: Questions/comments can posted as [github issues](https://github.com/eBay/bsonpatch/issues)
 
 ## Maintainers
 
