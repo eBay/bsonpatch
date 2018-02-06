@@ -23,7 +23,9 @@ import java.util.EnumSet;
 import java.util.List;
 
 import org.bson.BsonArray;
+import org.bson.BsonBinary;
 import org.bson.BsonDocument;
+import org.bson.BsonJavaScriptWithScope;
 import org.bson.BsonValue;
 
 class InPlaceApplyProcessor implements BsonPatchProcessor {
@@ -58,7 +60,8 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
         BsonValue parentNode = getParentNode(fromPath, Operation.COPY);
         String field = fromPath.get(fromPath.size() - 1).replaceAll("\"", "");
         BsonValue valueNode = parentNode.isArray() ? parentNode.asArray().get(Integer.parseInt(field)) : parentNode.asDocument().get(field);
-        add(toPath, valueNode);
+        BsonValue valueToCopy = valueNode != null ? cloneBsonValue(valueNode) : null;
+        add(toPath, valueToCopy);
     }
 
     @Override
@@ -238,4 +241,26 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
     private boolean isNullOrEmpty(String string) {
         return string == null || string.length() == 0;
     }
+    
+    private static BsonValue cloneBsonValue(BsonValue from) {
+        BsonValue to;
+        switch (from.getBsonType()) {
+            case DOCUMENT:
+                to = from.asDocument().clone();
+                break;
+            case ARRAY:
+                to = from.asArray().clone();
+                break;
+            case BINARY:
+            	to = new BsonBinary(from.asBinary().getType(), from.asBinary().getData().clone());
+                break;
+            case JAVASCRIPT_WITH_SCOPE:
+            	to = new BsonJavaScriptWithScope(from.asJavaScriptWithScope().getCode(), from.asJavaScriptWithScope().getScope().clone());
+                break;
+            default:
+                to = from; // assume that from is immutable
+        }
+        return to;
+    }
+    
 }

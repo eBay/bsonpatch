@@ -140,4 +140,15 @@ public class JsonDiffTest {
 
     }
     
+    @Test
+    public void testPath() throws Exception {
+        BsonValue source = BsonDocument.parse("{\"profiles\":{\"abc\":[],\"def\":[{\"hello\":\"world\"}]}}");
+        BsonArray patch = BsonArray.parse("[{\"op\":\"copy\",\"from\":\"/profiles/def/0\", \"path\":\"/profiles/def/0\"},{\"op\":\"replace\",\"path\":\"/profiles/def/0/hello\",\"value\":\"world2\"}]");
+
+        BsonValue target = BsonPatch.apply(patch, source);
+        //System.out.println(target);
+        BsonValue expected = BsonDocument.parse("{\"profiles\":{\"abc\":[],\"def\":[{\"hello\":\"world2\"},{\"hello\":\"world\"}]}}");
+        Assert.assertTrue(target.equals(expected));
+    }    
+    
 }
