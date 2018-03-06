@@ -152,9 +152,9 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
             String fieldToReplace = path.get(path.size() - 1).replaceAll("\"", "");
             if (isNullOrEmpty(fieldToReplace) && path.size() == 1)	
                 target = value;
-            else if (parentNode.isDocument())
+            else if (parentNode.isDocument() && parentNode.asDocument().containsKey(fieldToReplace)) {
                 parentNode.asDocument().put(fieldToReplace, value);
-            else if (parentNode.isArray())
+            } else if (parentNode.isArray())
                 parentNode.asArray().set(arrayIndex(fieldToReplace, parentNode.asArray().size() - 1, false), value);
             else
                 error(Operation.REPLACE, "noSuchPath in source, path provided : " + PathUtils.getPathRepresentation(path));
