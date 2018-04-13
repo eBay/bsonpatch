@@ -20,7 +20,7 @@ The code here was ported (copied, renamed, repackaged, modified) from the [zjson
 
 ### How to use:
 
-### Current Version : 0.4.3
+### Current Version : 0.4.4
 
 Add following to `<dependencies/>` section of your pom.xml -
 
