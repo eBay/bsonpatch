@@ -28,7 +28,7 @@ Add following to `<dependencies/>` section of your pom.xml -
 <dependency>
   <groupId>com.ebay.bsonpatch</groupId>
   <artifactId>bsonpatch</artifactId>
-  <version>0.4.3</version>
+  <version>0.4.4</version>
 </dependency>
 ```
 
