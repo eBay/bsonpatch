@@ -74,9 +74,9 @@ Second json ( the json to obtain )
 ```
 Following patch will be returned:
 ```json
-[{"op":"MOVE","from":"/a","path":"/b/2","value":0}]
+[{"op":"move","from":"/a","path":"/b/2"}]
 ```
-here 'op' represents Operation, 'from' represent path from where value should be moved, 'path' represents where value should be moved and value represents value to move.
+here 'op' represents Operation, 'from' represent path from where value should be moved, 'path' represents where value should be moved.
 
 ### Apply Json Patch In-Place
 ```xml
