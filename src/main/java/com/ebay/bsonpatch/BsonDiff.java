@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.ListUtils;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
@@ -134,6 +135,7 @@ public final class BsonDiff {
                     break;
                 case ARRAY:
                     computeArray(unchangedValues, path, source, target);
+                    break;
                 default:
                     /* nothing */
             }
@@ -272,6 +274,7 @@ public final class BsonDiff {
         return patch;
     }
 
+    @SuppressWarnings("fallthrough")
     private static BsonDocument getBsonNode(Diff diff, EnumSet<DiffFlags> flags) {
     	BsonDocument bsonNode = new BsonDocument();
         bsonNode.put(Constants.OP, new BsonString(diff.getOperation().rfcName()));
@@ -287,11 +290,12 @@ public final class BsonDiff {
                 bsonNode.put(Constants.PATH, new BsonString(PathUtils.getPathRepresentation(diff.getPath())));
                 if (!flags.contains(DiffFlags.OMIT_VALUE_ON_REMOVE))
                     bsonNode.put(Constants.VALUE, diff.getValue());
-                break;
+                break;    
             case REPLACE:
             	if (flags.contains(DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE)) {
             		bsonNode.put(Constants.FROM_VALUE, diff.getSrcValue());
-            	}            
+            	}
+            	// fall through intentional
             case ADD:
             case TEST:
                 bsonNode.put(Constants.PATH, new BsonString(PathUtils.getPathRepresentation(diff.getPath())));
@@ -432,6 +436,6 @@ public final class BsonDiff {
     }
 
     private static List<BsonValue> getLCS(final BsonValue first, final BsonValue second) {
-        return InternalUtils.longestCommonSubsequence(InternalUtils.toList(first.asArray()), InternalUtils.toList(second.asArray()));
+        return ListUtils.longestCommonSubsequence(InternalUtils.toList(first.asArray()), InternalUtils.toList(second.asArray()));
     }
 }

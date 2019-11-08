@@ -55,6 +55,9 @@
                     <testTarget>1.8</testTarget>					
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
+					<compilerArgs>
+						<arg>-Xlint:all,-options,-path</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -133,7 +136,12 @@
 			<artifactId>mongo-java-driver</artifactId>
 			<version>3.11.2</version>
 		</dependency>
-		<!-- For IOUtils.toString(inputStream, charset) and StringBuilderWriter -->
+		<dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.2</version>
+        </dependency>
+       	<!-- For IOUtils.toString(inputStream, charset) and StringBuilderWriter -->
 		<dependency>
 			<scope>test</scope>
 			<groupId>commons-io</groupId>
