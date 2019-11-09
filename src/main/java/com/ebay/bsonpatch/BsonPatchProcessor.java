@@ -19,15 +19,13 @@
 
 package com.ebay.bsonpatch;
 
-import java.util.List;
-
 import org.bson.BsonValue;
 
 interface BsonPatchProcessor {
-    void remove(List<String> path);
-    void replace(List<String> path, BsonValue value);
-    void add(List<String> path, BsonValue value);
-    void move(List<String> fromPath, List<String> toPath);
-    void copy(List<String> fromPath, List<String> toPath);
-    void test(List<String> path, BsonValue value);
+    void remove(JsonPointer path) throws JsonPointerEvaluationException;
+    void replace(JsonPointer path, BsonValue value) throws JsonPointerEvaluationException;
+    void add(JsonPointer path, BsonValue value) throws JsonPointerEvaluationException;
+    void move(JsonPointer fromPath, JsonPointer toPath) throws JsonPointerEvaluationException;
+    void copy(JsonPointer fromPath, JsonPointer toPath) throws JsonPointerEvaluationException;
+    void test(JsonPointer path, BsonValue value) throws JsonPointerEvaluationException;
 }

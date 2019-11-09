@@ -20,7 +20,6 @@
 package com.ebay.bsonpatch;
 
 import java.util.EnumSet;
-import java.util.List;
 
 import org.bson.BsonArray;
 import org.bson.BsonBinary;
@@ -47,202 +46,104 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
     }
 
     @Override
-    public void move(List<String> fromPath, List<String> toPath) {
-        BsonValue parentNode = getParentNode(fromPath, Operation.MOVE);
-        String field = fromPath.get(fromPath.size() - 1).replaceAll("\"", "");
-        BsonValue valueNode = parentNode.isArray() ? parentNode.asArray().get(Integer.parseInt(field)) : parentNode.asDocument().get(field);
+    public void move(JsonPointer fromPath, JsonPointer toPath) throws JsonPointerEvaluationException {
+        BsonValue valueNode = fromPath.evaluate(target);
         remove(fromPath);
-        add(toPath, valueNode);
+        set(toPath, valueNode, Operation.MOVE);
     }
 
     @Override
-    public void copy(List<String> fromPath, List<String> toPath) {
-        BsonValue parentNode = getParentNode(fromPath, Operation.COPY);
-        String field = fromPath.get(fromPath.size() - 1).replaceAll("\"", "");
-        BsonValue valueNode = parentNode.isArray() ? parentNode.asArray().get(Integer.parseInt(field)) : parentNode.asDocument().get(field);
-        BsonValue valueToCopy = valueNode != null ? cloneBsonValue(valueNode) : null;
-        add(toPath, valueToCopy);
+    public void copy(JsonPointer fromPath, JsonPointer toPath) throws JsonPointerEvaluationException {
+    	BsonValue valueNode = fromPath.evaluate(target);
+    	BsonValue valueToCopy = valueNode != null ? cloneBsonValue(valueNode) : null;
+        set(toPath, valueToCopy, Operation.COPY);
+    }
+    
+    private static String show(BsonValue value) {
+        if (value == null || value.isNull())
+            return "null";
+        else if (value.isArray())
+            return "array";
+        else if (value.isDocument())
+            return "object";
+        else if (value.isBoolean())
+        	return String.valueOf(value.asBoolean().getValue());
+        else if (value.isInt32())
+        	return String.valueOf(value.asInt32().intValue());
+        else if (value.isInt64())
+        	return String.valueOf(value.asInt64().longValue());
+        else if (value.isDouble())
+        	return String.valueOf(value.asDouble().doubleValue());
+        else
+            return "value " + value.toString();     // Caveat: numeric may differ from source (e.g. trailing zeros)
+    }    
+
+    @Override
+    public void test(JsonPointer path, BsonValue value) throws JsonPointerEvaluationException {
+    	BsonValue valueNode = path.evaluate(target);
+        if (!valueNode.equals(value))
+            throw new BsonPatchApplicationException(
+                    "Expected value " + show(value) + " but found " + show(valueNode), Operation.TEST, path);
     }
 
     @Override
-    public void test(List<String> path, BsonValue value) {
-        if (path.isEmpty()) {
-            error(Operation.TEST, "path is empty , path : ");
+    public void add(JsonPointer path, BsonValue value) throws JsonPointerEvaluationException {
+        set(path, value, Operation.ADD);
+    }
+    
+
+    @Override
+    public void replace(JsonPointer path, BsonValue value) throws JsonPointerEvaluationException {
+        if (path.isRoot()) {
+            target = value;
+            return;
+        }
+
+        BsonValue parentNode = path.getParent().evaluate(target);
+        JsonPointer.RefToken token = path.last();
+        if (parentNode.isDocument()) {
+            if (!parentNode.asDocument().containsKey(token.getField()))
+                throw new BsonPatchApplicationException(
+                        "Missing field \"" + token.getField() + "\"", Operation.REPLACE, path.getParent());
+            parentNode.asDocument().put(token.getField(), value);
+        } else if (parentNode.isArray()) {
+            if (token.getIndex() >= parentNode.asArray().size())
+                throw new BsonPatchApplicationException(
+                        "Array index " + token.getIndex() + " out of bounds", Operation.REPLACE, path.getParent());
+            parentNode.asArray().set(token.getIndex(), value);
         } else {
-        	BsonValue parentNode = getParentNode(path, Operation.TEST);
-            String fieldToReplace = path.get(path.size() - 1).replaceAll("\"", "");
-            if (fieldToReplace.equals("") && path.size() == 1)
-                if (target.equals(value)) {
-                    target = value;
-                } else {
-                    error(Operation.TEST, "value mismatch");
-                }
-            else if (!parentNode.isDocument() && !parentNode.isArray())
-                error(Operation.TEST, "parent is not a container in source, path provided : " + PathUtils.getPathRepresentation(path) + " | node : " + parentNode);
-            else if (parentNode.isArray()) {
-                final BsonArray target = parentNode.asArray();
-                String idxStr = path.get(path.size() - 1);
+            throw new BsonPatchApplicationException(
+                    "Can't reference past scalar value", Operation.REPLACE, path.getParent());
+        }
+    }
 
-                if ("-".equals(idxStr)) {
-                    // see http://tools.ietf.org/html/rfc6902#section-4.1
-                    if(!target.get(target.size() - 1).equals(value)) {
-                        error(Operation.TEST, "value mismatch");
-                    }
-                } else {
-                    int idx = arrayIndex(idxStr.replaceAll("\"", ""), target.size(), false);
-                    if (!target.get(idx).equals(value)) {
-                        error(Operation.TEST, "value mismatch");
-                    }
-                }
+    @Override
+    public void remove(JsonPointer path) throws JsonPointerEvaluationException {
+        if (path.isRoot())
+            throw new BsonPatchApplicationException("Cannot remove document root", Operation.REMOVE, path);
+
+        BsonValue parentNode = path.getParent().evaluate(target);
+        JsonPointer.RefToken token = path.last();
+        if (parentNode.isDocument())
+            parentNode.asDocument().remove(token.getField());
+        else if (parentNode.isArray()) {
+            if (!flags.contains(CompatibilityFlags.REMOVE_NONE_EXISTING_ARRAY_ELEMENT) && token.getIndex() >= parentNode.asArray().size()) {
+            	
+                throw new BsonPatchApplicationException(
+                        "Array index " + token.getIndex() + " out of bounds", Operation.REPLACE, path.getParent());
+            } else if (token.getIndex() >= parentNode.asArray().size()) {
+            	// do nothing, don't get upset about index out of bounds if REMOVE_NONE_EXISTING_ARRAY_ELEMENT set 
+            	// can't just call remove on BsonArray because it throws index out of bounds exception
             } else {
-                final BsonDocument target = parentNode.asDocument();
-                String key = path.get(path.size() - 1).replaceAll("\"", "");
-                BsonValue actual = target.get(key);
-                if (actual == null)
-                    error(Operation.TEST, "noSuchPath in source, path provided : " + PathUtils.getPathRepresentation(path));
-                else if (!actual.equals(value))
-                    error(Operation.TEST, "value mismatch");
+            	parentNode.asArray().remove(token.getIndex());
             }
-        }
-    }
-
-    @Override
-    public void add(List<String> path, BsonValue value) {
-        if (path.isEmpty()) {
-            error(Operation.ADD, "path is empty , path : ");
         } else {
-        	BsonValue parentNode = getParentNode(path, Operation.ADD);
-            String fieldToReplace = path.get(path.size() - 1).replaceAll("\"", "");
-            if (fieldToReplace.equals("") && path.size() == 1)
-                target = value;
-            else if (!parentNode.isDocument() && !parentNode.isArray())
-                error(Operation.ADD, "parent is not a container in source, path provided : " + PathUtils.getPathRepresentation(path) + " | node : " + parentNode);
-            else if (parentNode.isArray())
-                addToArray(path, value, parentNode);
-            else
-                addToObject(path, parentNode, value);
+            throw new BsonPatchApplicationException(
+                    "Cannot reference past scalar value", Operation.REPLACE, path.getParent());
         }
-    }
-
-    private void addToObject(List<String> path, BsonValue node, BsonValue value) {
-        final BsonDocument target = node.asDocument();
-        String key = path.get(path.size() - 1).replaceAll("\"", "");
-        target.put(key, value);
-    }
-
-    private void addToArray(List<String> path, BsonValue value, BsonValue parentNode) {
-        final BsonArray target = parentNode.asArray();
-        String idxStr = path.get(path.size() - 1);
-
-        if ("-".equals(idxStr)) {
-            // see http://tools.ietf.org/html/rfc6902#section-4.1
-            target.add(value);
-        } else {
-            int idx = arrayIndex(idxStr.replaceAll("\"", ""), target.size(), false);
-            target.add(idx, value);
-        }
-    }
-
-    @Override
-    public void replace(List<String> path, BsonValue value) {
-        if (path.isEmpty()) {
-            error(Operation.REPLACE, "path is empty");
-        } else {
-            BsonValue parentNode = getParentNode(path, Operation.REPLACE);
-            String fieldToReplace = path.get(path.size() - 1).replaceAll("\"", "");
-            if (isNullOrEmpty(fieldToReplace) && path.size() == 1)	
-                target = value;
-            else if (parentNode.isDocument() && parentNode.asDocument().containsKey(fieldToReplace)) {
-                parentNode.asDocument().put(fieldToReplace, value);
-            } else if (parentNode.isArray())
-                parentNode.asArray().set(arrayIndex(fieldToReplace, parentNode.asArray().size() - 1, false), value);
-            else
-                error(Operation.REPLACE, "noSuchPath in source, path provided : " + PathUtils.getPathRepresentation(path));
-        }
-    }
-
-    @Override
-    public void remove(List<String> path) {
-        if (path.isEmpty()) {
-            error(Operation.REMOVE, "path is empty");
-        } else {
-            BsonValue parentNode = getParentNode(path, Operation.REMOVE);
-            String fieldToRemove = path.get(path.size() - 1).replaceAll("\"", "");
-            if (parentNode.isDocument())
-                parentNode.asDocument().remove(fieldToRemove);
-            else if (parentNode.isArray()) {
-            	// If path specifies a non-existent array element and the REMOVE_NONE_EXISTING_ARRAY_ELEMENT flag is not set, then
-            	// arrayIndex will throw an error.
-            	int i = arrayIndex(fieldToRemove, parentNode.asArray().size() - 1, flags.contains(CompatibilityFlags.REMOVE_NONE_EXISTING_ARRAY_ELEMENT));
-            	// However, BsonArray.remove(int) is not very forgiving, so we need to avoid making the call if the index is past the end
-            	// otherwise, we'll get an IndexArrayOutOfBounds error
-            	if (i < parentNode.asArray().size()) {
-            		parentNode.asArray().remove(i);
-            	}
-            } else
-                error(Operation.REMOVE, "noSuchPath in source, path provided : " + PathUtils.getPathRepresentation(path));
-        }
-    }
-
-    private void error(Operation forOp, String message) {
-        throw new BsonPatchApplicationException("[" + forOp + " Operation] " + message);
-    }
-
-    private BsonValue getParentNode(List<String> fromPath, Operation forOp) {
-        List<String> pathToParent = fromPath.subList(0, fromPath.size() - 1); // would never by out of bound, lets see
-        BsonValue node = getNode(target, pathToParent, 1);
-        if (node == null)
-        	error(forOp, "noSuchPath in source, path provided: " + PathUtils.getPathRepresentation(fromPath));
-        return node;
-    }
-
-    private BsonValue getNode(BsonValue ret, List<String> path, int pos) {
-        if (pos >= path.size()) {
-            return ret;
-        }
-        String key = path.get(pos);
-        if (ret.isArray()) {
-            int keyInt = Integer.parseInt(key.replaceAll("\"", ""));
-            // Check for index out of bounds, treat as no such path error
-            if (keyInt >= ret.asArray().size()) {
-            	return null;
-            }
-            BsonValue element = ret.asArray().get(keyInt);
-            if (element == null)
-                return null;
-            else
-                return getNode(ret.asArray().get(keyInt), path, ++pos);
-        } else if (ret.isDocument()) {
-            if (ret.asDocument().containsKey(key)) {
-                return getNode(ret.asDocument().get(key), path, ++pos);
-            }
-            return null;
-        } else {
-            return ret;
-        }
-    }
-
-    private int arrayIndex(String s, int max, boolean allowNoneExisting) {
-        int index;
-        try {
-            index = Integer.parseInt(s);
-        } catch (NumberFormatException nfe) {
-            throw new BsonPatchApplicationException("Object operation on array target");
-        }
-        if (index < 0) {
-            throw new BsonPatchApplicationException("index Out of bound, index is negative");
-        } else if (index > max) {
-        	if (!allowNoneExisting)
-        		throw new BsonPatchApplicationException("index Out of bound, index is greater than " + max);
-        }
-        return index;
     }
     
-    private boolean isNullOrEmpty(String string) {
-        return string == null || string.length() == 0;
-    }
-    
-    private static BsonValue cloneBsonValue(BsonValue from) {
+    static BsonValue cloneBsonValue(BsonValue from) {
         BsonValue to;
         switch (from.getBsonType()) {
             case DOCUMENT:
@@ -262,5 +163,40 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
         }
         return to;
     }
+    
+    private void set(JsonPointer path, BsonValue value, Operation forOp) throws JsonPointerEvaluationException {
+        if (path.isRoot())
+            target = value;
+        else {
+        	BsonValue parentNode = path.getParent().evaluate(target);
+            if (!parentNode.isDocument() && !parentNode.isArray())
+                throw new BsonPatchApplicationException("Cannot reference past scalar value", forOp, path.getParent());
+            else if (parentNode.isArray())
+                addToArray(path, value, parentNode);
+            else
+                addToObject(path, parentNode, value);
+        }
+    }    
+
+    private void addToObject(JsonPointer path, BsonValue node, BsonValue value) {
+        final BsonDocument target = node.asDocument();
+        String key = path.last().getField();
+        target.put(key, value);
+    }
+
+    private void addToArray(JsonPointer path, BsonValue value, BsonValue parentNode) {
+        final BsonArray target = parentNode.asArray();
+        int idx = path.last().getIndex();
+
+        if (idx == JsonPointer.LAST_INDEX) {
+            // see http://tools.ietf.org/html/rfc6902#section-4.1
+            target.add(value);
+        } else {
+            if (idx > target.size())
+                throw new BsonPatchApplicationException(
+                        "Array index " + idx + " out of bounds", Operation.ADD, path.getParent());
+            target.add(idx, value);
+        }
+    }    
     
 }

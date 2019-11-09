@@ -101,7 +101,7 @@ public abstract class AbstractTest {
         BsonDocument node = p.getNode();
         BsonValue first = node.get("node");
         BsonArray patch = node.getArray("op");
-        String message = node.containsKey("message") ? node.getString("message").getValue() : "";
+        String message = node.containsKey("message") ? node.getString("message").getValue().replace("\\\"","\"") : "";
         Class<?> type =
                 node.containsKey("type") ? exceptionType(node.getString("type").getValue()) : BsonPatchApplicationException.class;
 
@@ -121,7 +121,7 @@ public abstract class AbstractTest {
                 if (message != null) {
                     assertThat(
                             errorMessage("Operation failed but with wrong message", e),
-                            e.getMessage(),
+                            e.toString(),
                             containsString(message));    // equalTo would be better, but fail existing tests
                 }
             }

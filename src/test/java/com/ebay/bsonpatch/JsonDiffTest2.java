@@ -33,7 +33,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class JsonDiffTest2 {
-    static BsonArray jsonNode;
+    private static BsonArray jsonNode;
 
     @BeforeClass
     public static void beforeClass() throws IOException {
@@ -44,7 +44,7 @@ public class JsonDiffTest2 {
     }
 
     @Test
-    public void testPatchAppliedCleanly() throws Exception {
+    public void testPatchAppliedCleanly() {
         for (int i = 0; i < jsonNode.size(); i++) {
         	BsonDocument node = jsonNode.get(i).asDocument();
         	
@@ -52,14 +52,8 @@ public class JsonDiffTest2 {
             BsonValue second = node.get("second");
             BsonArray patch = node.getArray("patch");
             String message = node.containsKey("message") ? node.getString("message").getValue() : "";
-
-//            System.out.println("Test # " + i);
-//            System.out.println(first);
-//            System.out.println(second);
-//            System.out.println(patch);
-
             BsonValue secondPrime = BsonPatch.apply(patch, first);
-//            System.out.println(secondPrime);
+
             Assert.assertThat(message, secondPrime, equalTo(second));
         }
 

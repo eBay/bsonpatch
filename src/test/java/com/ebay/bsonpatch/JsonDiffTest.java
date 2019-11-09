@@ -35,7 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class JsonDiffTest {
-    static BsonArray jsonNode;
+    private static BsonArray jsonNode;
 
     @BeforeClass
     public static void beforeClass() throws IOException {
@@ -46,47 +46,31 @@ public class JsonDiffTest {
     }
 
     @Test
-    public void testSampleJsonDiff() throws Exception {
+    public void testSampleJsonDiff() {
         for (int i = 0; i < jsonNode.size(); i++) {
             BsonValue first = jsonNode.get(i).asDocument().get("first");
             BsonValue second = jsonNode.get(i).asDocument().get("second");
-
-//            System.out.println("Test # " + i);
-//            System.out.println(first);
-//            System.out.println(second);
-
             BsonArray actualPatch = BsonDiff.asBson(first, second);
-
-//            System.out.println(actualPatch);
-
             BsonValue secondPrime = BsonPatch.apply(actualPatch, first);
-//            System.out.println(secondPrime);
-            Assert.assertTrue(second.equals(secondPrime));
+            Assert.assertEquals("BSON Patch not symmetrical [index=" + i + ", first=" + first + "]", second, secondPrime);
+
         }
     }
 
     @Test
-    public void testGeneratedJsonDiff() throws Exception {
+    public void testGeneratedJsonDiff() {
         Random random = new Random();
         for (int i = 0; i < 1000; i++) {
             BsonArray first = TestDataGenerator.generate(random.nextInt(10));
             BsonArray second = TestDataGenerator.generate(random.nextInt(10));
-
             BsonArray actualPatch = BsonDiff.asBson(first, second);
-//            System.out.println("Test # " + i);
-//
-//            System.out.println(first);
-//            System.out.println(second);
-//            System.out.println(actualPatch);
-
             BsonArray secondPrime = BsonPatch.apply(actualPatch, first).asArray();
-//            System.out.println(secondPrime);
-            Assert.assertTrue(second.equals(secondPrime));
+            Assert.assertEquals(second,secondPrime);
         }
     }
 
     @Test
-    public void testRenderedRemoveOperationOmitsValueByDefault() throws Exception {
+    public void testRenderedRemoveOperationOmitsValueByDefault() {
         BsonDocument source = new BsonDocument();
         BsonDocument target = new BsonDocument();
         source.put("field", new BsonString("value"));
@@ -99,7 +83,7 @@ public class JsonDiffTest {
     }
 
     @Test
-    public void testRenderedRemoveOperationRetainsValueIfOmitDiffFlagNotSet() throws Exception {
+    public void testRenderedRemoveOperationRetainsValueIfOmitDiffFlagNotSet() {
         BsonDocument source = new BsonDocument();
         BsonDocument target = new BsonDocument();
         source.put("field", new BsonString("value"));
@@ -124,18 +108,13 @@ public class JsonDiffTest {
 
         BsonArray diff = BsonDiff.asBson(source, target, flags);
 
-//        System.out.println(source);
-//        System.out.println(target);
-//        System.out.println(diff);
-
         for (BsonValue d : diff) {
             Assert.assertNotEquals(Operation.MOVE.rfcName(), d.asDocument().getString("op").getValue());
             Assert.assertNotEquals(Operation.COPY.rfcName(), d.asDocument().getString("op").getValue());
         }
 
         BsonValue targetPrime = BsonPatch.apply(diff, source);
-//        System.out.println(targetPrime);
-        Assert.assertTrue(target.equals(targetPrime));
+        Assert.assertEquals(target, targetPrime);
 
 
     }
@@ -146,9 +125,8 @@ public class JsonDiffTest {
         BsonArray patch = BsonArray.parse("[{\"op\":\"copy\",\"from\":\"/profiles/def/0\", \"path\":\"/profiles/def/0\"},{\"op\":\"replace\",\"path\":\"/profiles/def/0/hello\",\"value\":\"world2\"}]");
 
         BsonValue target = BsonPatch.apply(patch, source);
-        //System.out.println(target);
         BsonValue expected = BsonDocument.parse("{\"profiles\":{\"abc\":[],\"def\":[{\"hello\":\"world2\"},{\"hello\":\"world\"}]}}");
-        Assert.assertTrue(target.equals(expected));
+        Assert.assertEquals(target, expected);
     }    
     
 }

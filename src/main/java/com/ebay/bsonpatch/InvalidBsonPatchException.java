@@ -23,14 +23,6 @@ public class InvalidBsonPatchException extends BsonPatchApplicationException {
 	private static final long serialVersionUID = 1525480895357401013L;
 
 	public InvalidBsonPatchException(String message) {
-        super(message);
-    }
-
-    public InvalidBsonPatchException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidBsonPatchException(Throwable cause) {
-        super(cause);
+        super(message, null, null);
     }
 }

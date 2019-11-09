@@ -40,8 +40,8 @@ public class CompatibilityTest {
 
     @Before
     public void setUp() throws Exception {
-        addNodeWithMissingValue = BsonArray.parse("[{\"op\":\"add\",\"path\":\"a\"}]");
-        replaceNodeWithMissingValue = BsonArray.parse("[{\"op\":\"replace\",\"path\":\"a\"}]");
+    	addNodeWithMissingValue = BsonArray.parse("[{\"op\":\"add\",\"path\":\"/a\"}]");
+        replaceNodeWithMissingValue = BsonArray.parse("[{\"op\":\"replace\",\"path\":\"/a\"}]");
         removeNoneExistingArrayElement = BsonArray.parse("[{\"op\": \"remove\",\"path\": \"/b/0\"}]");
     }
 

@@ -21,16 +21,23 @@ package com.ebay.bsonpatch;
 
 public class BsonPatchApplicationException extends RuntimeException {
 	private static final long serialVersionUID = 7562538769544371424L;
+	
+	Operation operation;
+    JsonPointer path;
 
-	public BsonPatchApplicationException(String message) {
+	public BsonPatchApplicationException(String message, Operation operation, JsonPointer path) {
         super(message);
+        this.operation = operation;
+        this.path = path;
     }
+	
+	@Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        if (operation != null) sb.append('[').append(operation).append(" Operation] ");
+        sb.append(getMessage());
+        if (path != null) sb.append(" at ").append(path.isRoot() ? "root" : path);
+        return sb.toString();
+    }	
 
-    public BsonPatchApplicationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public BsonPatchApplicationException(Throwable cause) {
-        super(cause);
-    }
 }

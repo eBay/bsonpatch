@@ -20,12 +20,10 @@
 package com.ebay.bsonpatch;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.bson.BsonDocument;
 import org.bson.BsonValue;
 
@@ -55,9 +53,7 @@ public class PatchTestCase {
 
     public static Collection<PatchTestCase> load(String fileName) throws IOException {
         String path = "/testdata/" + fileName + ".json";
-        InputStream resourceAsStream = PatchTestCase.class.getResourceAsStream(path);
-        String testData = IOUtils.toString(resourceAsStream, "UTF-8");
-        BsonDocument tree = BsonDocument.parse(testData);
+        BsonDocument tree = (BsonDocument) TestUtils.loadResourceAsBsonValue(path);
 
         List<PatchTestCase> result = new ArrayList<PatchTestCase>();
         for (BsonValue node : tree.getArray("errors")) {

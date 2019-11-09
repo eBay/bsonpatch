@@ -19,25 +19,23 @@
 
 package com.ebay.bsonpatch;
 
-import java.util.List;
-
 import org.bson.BsonValue;
 
 class Diff {
     private final Operation operation;
-    private final List<Object> path;
+    private final JsonPointer path;
     private final BsonValue value;
-    private List<Object> toPath; //only to be used in move operation
+    private JsonPointer toPath; //only to be used in move operation
     private final BsonValue srcValue; // only used in replace operation
 
-    Diff(Operation operation, List<Object> path, BsonValue value) {
+    Diff(Operation operation, JsonPointer path, BsonValue value) {
         this.operation = operation;
         this.path = path;
         this.value = value;
         this.srcValue = null;
     }
 
-    Diff(Operation operation, List<Object> fromPath, List<Object> toPath) {
+    Diff(Operation operation, JsonPointer fromPath, JsonPointer toPath) {
         this.operation = operation;
         this.path = fromPath;
         this.toPath = toPath;
@@ -45,7 +43,7 @@ class Diff {
         this.srcValue = null;
     }
     
-    Diff(Operation operation, List<Object> path, BsonValue srcValue, BsonValue value) {
+    Diff(Operation operation, JsonPointer path, BsonValue srcValue, BsonValue value) {
         this.operation = operation;
         this.path = path;
         this.value = value;
@@ -56,7 +54,7 @@ class Diff {
         return operation;
     }
 
-    public List<Object> getPath() {
+    public JsonPointer getPath() {
         return path;
     }
 
@@ -64,15 +62,15 @@ class Diff {
         return value;
     }
 
-    public static Diff generateDiff(Operation replace, List<Object> path, BsonValue target) {
+    public static Diff generateDiff(Operation replace, JsonPointer path, BsonValue target) {
         return new Diff(replace, path, target);
     }
     
-    public static Diff generateDiff(Operation replace, List<Object> path, BsonValue source, BsonValue target) {
+    public static Diff generateDiff(Operation replace, JsonPointer path, BsonValue source, BsonValue target) {
         return new Diff(replace, path, source, target);
     }    
 
-    List<Object> getToPath() {
+    JsonPointer getToPath() {
         return toPath;
     }
     

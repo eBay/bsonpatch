@@ -19,8 +19,6 @@
 
 package com.ebay.bsonpatch;
 
-import java.util.List;
-
 import org.bson.BsonValue;
 
 /** 
@@ -32,11 +30,11 @@ public class NoopProcessor implements BsonPatchProcessor {
         INSTANCE = new NoopProcessor();
     }
 
-    @Override public void remove(List<String> path) {}
-    @Override public void replace(List<String> path, BsonValue value) {}
-    @Override public void add(List<String> path, BsonValue value) {}
-    @Override public void move(List<String> fromPath, List<String> toPath) {}
-    @Override public void copy(List<String> fromPath, List<String> toPath) {}
-    @Override public void test(List<String> path, BsonValue value) {}
+    @Override public void remove(JsonPointer path) {}
+    @Override public void replace(JsonPointer path, BsonValue value) {}
+    @Override public void add(JsonPointer path, BsonValue value) {}
+    @Override public void move(JsonPointer fromPath, JsonPointer toPath) {}
+    @Override public void copy(JsonPointer fromPath, JsonPointer toPath) {}
+    @Override public void test(JsonPointer path, BsonValue value) {}
 
 }

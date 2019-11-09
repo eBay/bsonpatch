@@ -19,9 +19,10 @@
 
 package com.ebay.bsonpatch;
 
+import static com.ebay.bsonpatch.InPlaceApplyProcessor.cloneBsonValue;
+
 import java.util.EnumSet;
 import java.util.Iterator;
-import java.util.List;
 
 import org.bson.BsonArray;
 import org.bson.BsonNull;
@@ -54,57 +55,62 @@ public final class BsonPatch {
         	BsonValue bsonNode = operations.next();
             if (!bsonNode.isDocument()) throw new InvalidBsonPatchException("Invalid BSON Patch payload (not an object)");
             Operation operation = Operation.fromRfcName(getPatchAttr(bsonNode, Constants.OP).asString().getValue().replaceAll("\"", ""));
-            List<String> path = PathUtils.getPath(getPatchAttr(bsonNode, Constants.PATH));
+            JsonPointer path = JsonPointer.parse(getPatchAttr(bsonNode, Constants.PATH).asString().getValue());
 
-            switch (operation) {
-                case REMOVE: {
-                    processor.remove(path);
-                    break;
-                }
-
-                case ADD: {
-                    BsonValue value;
-                    if (!flags.contains(CompatibilityFlags.MISSING_VALUES_AS_NULLS))
-                        value = getPatchAttr(bsonNode, Constants.VALUE);
-                    else
-                        value = getPatchAttrWithDefault(bsonNode, Constants.VALUE, BsonNull.VALUE);
-                    processor.add(path, CopyingApplyProcessor.deepCopy(value));
-                    break;
-                }
-
-                case REPLACE: {
-                	BsonValue value;
-                    if (!flags.contains(CompatibilityFlags.MISSING_VALUES_AS_NULLS))
-                        value = getPatchAttr(bsonNode, Constants.VALUE);
-                    else
-                        value = getPatchAttrWithDefault(bsonNode, Constants.VALUE, BsonNull.VALUE);
-                    processor.replace(path, CopyingApplyProcessor.deepCopy(value));
-                    break;
-                }
-
-                case MOVE: {
-                    List<String> fromPath = PathUtils.getPath(getPatchAttr(bsonNode, Constants.FROM));
-                    processor.move(fromPath, path);
-                    break;
-                }
-
-                case COPY: {
-                    List<String> fromPath = PathUtils.getPath(getPatchAttr(bsonNode, Constants.FROM));
-                    processor.copy(fromPath, path);
-                    break;
-                }
-
-                case TEST: {
-                	BsonValue value;
-                    if (!flags.contains(CompatibilityFlags.MISSING_VALUES_AS_NULLS))
-                        value = getPatchAttr(bsonNode, Constants.VALUE);
-                    else
-                        value = getPatchAttrWithDefault(bsonNode, Constants.VALUE, BsonNull.VALUE);
-                    processor.test(path, CopyingApplyProcessor.deepCopy(value));
-                    break;
-                }
+            try {
+	            switch (operation) {
+		            case REMOVE: {
+		                processor.remove(path);
+		                break;
+		            }
+		
+		            case ADD: {
+		            	BsonValue value;
+		                if (!flags.contains(CompatibilityFlags.MISSING_VALUES_AS_NULLS))
+		                    value = getPatchAttr(bsonNode, Constants.VALUE);
+		                else
+		                    value = getPatchAttrWithDefault(bsonNode, Constants.VALUE, BsonNull.VALUE);
+		                processor.add(path, cloneBsonValue(value));
+		                break;
+		            }
+		
+		            case REPLACE: {
+		            	BsonValue value;
+		                if (!flags.contains(CompatibilityFlags.MISSING_VALUES_AS_NULLS))
+		                    value = getPatchAttr(bsonNode, Constants.VALUE);
+		                else
+		                    value = getPatchAttrWithDefault(bsonNode, Constants.VALUE, BsonNull.VALUE);
+		                processor.replace(path, cloneBsonValue(value));
+		                break;
+		            }
+		
+		            case MOVE: {
+		                JsonPointer fromPath = JsonPointer.parse(getPatchAttr(bsonNode, Constants.FROM).asString().getValue());
+		                processor.move(fromPath, path);
+		                break;
+		            }
+		
+		            case COPY: {
+		                JsonPointer fromPath = JsonPointer.parse(getPatchAttr(bsonNode, Constants.FROM).asString().getValue());
+		                processor.copy(fromPath, path);
+		                break;
+		            }
+		
+		            case TEST: {
+		            	BsonValue value;
+		                if (!flags.contains(CompatibilityFlags.MISSING_VALUES_AS_NULLS))
+		                    value = getPatchAttr(bsonNode, Constants.VALUE);
+		                else
+		                    value = getPatchAttrWithDefault(bsonNode, Constants.VALUE, BsonNull.VALUE);
+		                processor.test(path, cloneBsonValue(value));
+		                break;
+		            }
+	            }
             }
-        }
+            catch (JsonPointerEvaluationException e) {
+                throw new BsonPatchApplicationException(e.getMessage(), operation, e.getPath());
+            }
+         }
     }
 
     public static void validate(BsonArray patch, EnumSet<CompatibilityFlags> flags) throws InvalidBsonPatchException {

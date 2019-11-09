@@ -4,7 +4,7 @@
             "op": [{ "op": "add", "path": "/a" }],
             "node": {},
             "type": "BsonPatchApplicationException",
-            "message": "missing 'value' field"
+            "message": "Invalid BSON Patch payload (missing 'value' field)"
         }
     ],
     "ops": [
