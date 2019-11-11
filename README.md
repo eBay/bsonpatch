@@ -11,7 +11,7 @@ The code here was ported (copied, renamed, repackaged, modified) from the [zjson
 - This library compares two [BsonValue](http://mongodb.github.io/mongo-java-driver/3.6/javadoc/org/bson/BsonValue.html) inputs and produces a [BsonArray](http://mongodb.github.io/mongo-java-driver/3.6/javadoc/org/bson/BsonArray.html) of the changes.
 
 
-### Compatible with : Java 6 and above all versions
+### Compatible with : Java 8 and above all versions
 
 ## Complexity
 - To find JsonPatch : Ω(N+M) ,N and M represents number of keys in first and second JSON respectively / O(summation of la*lb) where la , lb represents JSON Array of length la / lb of against same key in first and second JSON ,since LCS is used to find difference between 2 JSON arrays there of order of quadratic.
@@ -20,7 +20,7 @@ The code here was ported (copied, renamed, repackaged, modified) from the [zjson
 
 ### How to use:
 
-### Current Version : 0.4.8
+### Current Version : 0.4.9
 
 Add following to `<dependencies/>` section of your pom.xml -
 
@@ -28,7 +28,7 @@ Add following to `<dependencies/>` section of your pom.xml -
 <dependency>
   <groupId>com.ebay.bsonpatch</groupId>
   <artifactId>bsonpatch</artifactId>
-  <version>0.4.8</version>
+  <version>0.4.9</version>
 </dependency>
 ```
 

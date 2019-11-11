@@ -102,7 +102,8 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
         BsonValue parentNode = path.getParent().evaluate(target);
         JsonPointer.RefToken token = path.last();
         if (parentNode.isDocument()) {
-            if (!parentNode.asDocument().containsKey(token.getField()))
+            if (!flags.contains(CompatibilityFlags.ALLOW_MISSING_TARGET_OBJECT_ON_REPLACE) &&
+            		!parentNode.asDocument().containsKey(token.getField()))
                 throw new BsonPatchApplicationException(
                         "Missing field \"" + token.getField() + "\"", Operation.REPLACE, path.getParent());
             parentNode.asDocument().put(token.getField(), value);
