@@ -20,6 +20,7 @@
 package com.ebay.bsonpatch;
 
 import static com.ebay.bsonpatch.CompatibilityFlags.ALLOW_MISSING_TARGET_OBJECT_ON_REPLACE;
+import static com.ebay.bsonpatch.CompatibilityFlags.FORBID_REMOVE_MISSING_OBJECT;
 import static com.ebay.bsonpatch.CompatibilityFlags.MISSING_VALUES_AS_NULLS;
 import static com.ebay.bsonpatch.CompatibilityFlags.REMOVE_NONE_EXISTING_ARRAY_ELEMENT;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -30,6 +31,7 @@ import java.util.EnumSet;
 
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
+import org.bson.BsonValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,6 +41,7 @@ public class CompatibilityTest {
     BsonArray replaceNodeWithMissingValue;
     BsonArray removeNoneExistingArrayElement;
     BsonArray replaceNode;
+    BsonArray removeNode;
 
     @Before
     public void setUp() throws Exception {
@@ -46,6 +49,7 @@ public class CompatibilityTest {
         replaceNodeWithMissingValue = BsonArray.parse("[{\"op\":\"replace\",\"path\":\"/a\"}]");
         removeNoneExistingArrayElement = BsonArray.parse("[{\"op\": \"remove\",\"path\": \"/b/0\"}]");
         replaceNode = BsonArray.parse("[{\"op\":\"replace\",\"path\":\"/a\",\"value\":true}]");
+        removeNode = BsonArray.parse("[{\"op\":\"remove\",\"path\":\"/b\"}]");
     }
 
     @Test
@@ -87,4 +91,17 @@ public class CompatibilityTest {
     	BsonDocument result = BsonPatch.apply(replaceNode, BsonDocument.parse("{}"), EnumSet.of(ALLOW_MISSING_TARGET_OBJECT_ON_REPLACE)).asDocument();
         assertThat(result, equalTo(expected));
     }
-}
+
+    @Test(expected = BsonPatchApplicationException.class)
+    public void withFlagRemoveMissingValueShouldThrow() throws Exception {
+        BsonDocument source = BsonDocument.parse("{\"a\": true}");
+        BsonPatch.apply(removeNode, source, EnumSet.of(FORBID_REMOVE_MISSING_OBJECT));
+    }
+
+    @Test
+    public void withFlagRemoveShouldRemove() throws Exception {
+        BsonDocument source = BsonDocument.parse("{\"b\": true}");
+        BsonDocument expected = BsonDocument.parse("{}");
+        BsonValue result = BsonPatch.apply(removeNode, source, EnumSet.of(FORBID_REMOVE_MISSING_OBJECT));
+        assertThat(result, equalTo(expected));
+    }}

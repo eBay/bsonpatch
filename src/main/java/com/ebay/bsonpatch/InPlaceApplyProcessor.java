@@ -125,13 +125,17 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
 
         BsonValue parentNode = path.getParent().evaluate(target);
         JsonPointer.RefToken token = path.last();
-        if (parentNode.isDocument())
-            parentNode.asDocument().remove(token.getField());
-        else if (parentNode.isArray()) {
-            if (!flags.contains(CompatibilityFlags.REMOVE_NONE_EXISTING_ARRAY_ELEMENT) && token.getIndex() >= parentNode.asArray().size()) {
-            	
+        if (parentNode.isDocument()) {
+            if (flags.contains(CompatibilityFlags.FORBID_REMOVE_MISSING_OBJECT) && !parentNode.asDocument().containsKey(token.getField()))
                 throw new BsonPatchApplicationException(
-                        "Array index " + token.getIndex() + " out of bounds", Operation.REPLACE, path.getParent());
+                        "Missing field " + token.getField(), Operation.REMOVE, path.getParent());
+            parentNode.asDocument().remove(token.getField());
+        }
+        else if (parentNode.isArray()) {
+            if (!flags.contains(CompatibilityFlags.REMOVE_NONE_EXISTING_ARRAY_ELEMENT) &&
+                    token.getIndex() >= parentNode.asArray().size()) {
+                throw new BsonPatchApplicationException(
+                        "Array index " + token.getIndex() + " out of bounds", Operation.REMOVE, path.getParent());
             } else if (token.getIndex() >= parentNode.asArray().size()) {
             	// do nothing, don't get upset about index out of bounds if REMOVE_NONE_EXISTING_ARRAY_ELEMENT set 
             	// can't just call remove on BsonArray because it throws index out of bounds exception
@@ -140,7 +144,7 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
             }
         } else {
             throw new BsonPatchApplicationException(
-                    "Cannot reference past scalar value", Operation.REPLACE, path.getParent());
+                    "Cannot reference past scalar value", Operation.REMOVE, path.getParent());
         }
     }
     

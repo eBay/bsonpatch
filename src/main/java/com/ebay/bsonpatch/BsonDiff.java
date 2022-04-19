@@ -48,20 +48,29 @@ public final class BsonDiff {
 
     public static BsonArray asBson(final BsonValue source, final BsonValue target, EnumSet<DiffFlags> flags) {
         BsonDiff diff = new BsonDiff(flags);
-        
-        // generating diffs in the order of their occurrence
-        diff.generateDiffs(JsonPointer.ROOT, source, target);
-
-        if (!flags.contains(DiffFlags.OMIT_MOVE_OPERATION)) {        
-	         // Merging remove & add to move operation
-        	diff.introduceMoveOperation();
+        if (source == null && target != null) {
+            // return add node at root pointing to the target
+            diff.diffs.add(Diff.generateDiff(Operation.ADD, JsonPointer.ROOT, target));
         }
-
-        if (!flags.contains(DiffFlags.OMIT_COPY_OPERATION)) {
-	         // Introduce copy operation
-        	diff.introduceCopyOperation(source, target);
+        if (source != null && target == null) {
+            // return remove node at root pointing to the source
+            diff.diffs.add(Diff.generateDiff(Operation.REMOVE, JsonPointer.ROOT, source));
         }
+        if (source != null && target != null) {
+            diff.generateDiffs(JsonPointer.ROOT, source, target);
 
+            if (!flags.contains(DiffFlags.OMIT_MOVE_OPERATION))
+                // Merging remove & add to move operation
+                diff.introduceMoveOperation();
+
+            if (!flags.contains(DiffFlags.OMIT_COPY_OPERATION))
+                 // Introduce copy operation
+                diff.introduceCopyOperation(source, target);
+
+            if (flags.contains(DiffFlags.ADD_EXPLICIT_REMOVE_ADD_ON_REPLACE))
+                // Split replace into remove and add instructions
+                diff.introduceExplicitRemoveAndAddOperation();
+        }
         return diff.getBsonNodes();
     }
 
@@ -210,6 +219,26 @@ public final class BsonDiff {
                 }
             }
         }
+    }
+
+    /**
+     * This method splits a {@link Operation#REPLACE} operation within a diff into a {@link Operation#REMOVE}
+     * and {@link Operation#ADD} in order, respectively.
+     * Does nothing if {@link Operation#REPLACE} op does not contain a from value
+     */
+    private void introduceExplicitRemoveAndAddOperation() {
+        List<Diff> updatedDiffs = new ArrayList<Diff>();
+        for (Diff diff : diffs) {
+            if (!diff.getOperation().equals(Operation.REPLACE) || diff.getSrcValue() == null) {
+                updatedDiffs.add(diff);
+                continue;
+            }
+            //Split into two #REMOVE and #ADD
+            updatedDiffs.add(new Diff(Operation.REMOVE, diff.getPath(), diff.getSrcValue()));
+            updatedDiffs.add(new Diff(Operation.ADD, diff.getPath(), diff.getValue()));
+        }
+        diffs.clear();
+        diffs.addAll(updatedDiffs);
     }
 
     //Note : only to be used for arrays

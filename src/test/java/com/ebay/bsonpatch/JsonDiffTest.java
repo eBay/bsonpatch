@@ -21,8 +21,11 @@ package com.ebay.bsonpatch;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.BsonArray;
@@ -41,7 +44,7 @@ public class JsonDiffTest {
     public static void beforeClass() throws IOException {
         String path = "/testdata/sample.json";
         InputStream resourceAsStream = JsonDiffTest.class.getResourceAsStream(path);
-        String testData = IOUtils.toString(resourceAsStream, "UTF-8");
+        String testData = IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8);
         jsonNode = BsonArray.parse(testData);
     }
 
@@ -127,6 +130,36 @@ public class JsonDiffTest {
         BsonValue target = BsonPatch.apply(patch, source);
         BsonValue expected = BsonDocument.parse("{\"profiles\":{\"abc\":[],\"def\":[{\"hello\":\"world2\"},{\"hello\":\"world\"}]}}");
         Assert.assertEquals(target, expected);
-    }    
-    
+    }
+
+
+    @Test
+    public void testJsonDiffReturnsEmptyNodeExceptionWhenBothSourceAndTargetNodeIsNull() {
+        BsonArray diff = BsonDiff.asBson(null, null);
+        assertEquals(0, diff.size());
+    }
+
+    @Test
+    public void testJsonDiffShowsDiffWhenSourceNodeIsNull() {
+        String target = "{ \"K1\": {\"K2\": \"V1\"} }";
+        BsonArray diff = BsonDiff.asBson(null, BsonDocument.parse(target));
+        assertEquals(1, diff.size());
+
+        System.out.println(diff);
+        assertEquals(Operation.ADD.rfcName(), diff.get(0).asDocument().getString("op").getValue());
+        assertEquals(JsonPointer.ROOT.toString(), diff.get(0).asDocument().getString("path").getValue());
+        assertEquals("V1", diff.get(0).asDocument().getDocument("value").getDocument("K1").getString("K2").getValue());
+    }
+
+    @Test
+    public void testJsonDiffShowsDiffWhenTargetNodeIsNullWithFlags() {
+        String source = "{ \"K1\": \"V1\" }";
+        BsonDocument sourceNode = BsonDocument.parse(source);
+        BsonArray diff = BsonDiff.asBson(sourceNode, null, EnumSet.of(DiffFlags.ADD_ORIGINAL_VALUE_ON_REPLACE));
+
+        assertEquals(1, diff.size());
+        assertEquals(Operation.REMOVE.rfcName(), diff.get(0).asDocument().getString("op").getValue());
+        assertEquals(JsonPointer.ROOT.toString(), diff.get(0).asDocument().getString("path").getValue());
+        assertEquals("V1", diff.get(0).asDocument().getDocument("value").getString("K1").getValue());
+    }
 }

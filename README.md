@@ -1,14 +1,15 @@
-# This is an implementation of  [RFC 6902 JSON Patch](http://tools.ietf.org/html/rfc6902) written in Java.
+# This is an implementation of  [RFC 6902 JSON Patch](https://datatracker.ietf.org/doc/html/rfc6902) written in Java.
 
 This [JSON Patch](http://jsonpatch.com) implementation works directly with [BSON documents](http://bsonspec.org/) using the [MongoDB Java driver implementation of BSON](https://www.mongodb.com/json-and-bson). 
 
 The code here was ported (copied, renamed, repackaged, modified) from the [zjsonpatch project](https://github.com/flipkart-incubator/zjsonpatch).
 
 ## Description & Use-Cases
-- Java Library to find / apply JSON Patches according to [RFC 6902](http://tools.ietf.org/html/rfc6902).
+- Java Library to find / apply JSON Patches according to [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902).
 - JSON Patch defines a JSON document structure for representing changes to a JSON document.
 - It can be used to avoid sending a whole document when only a part has changed, thus reducing network bandwidth requirements if data (in JSON format) is required to send across multiple systems over network or in case of multi DC transfer.
-- This library compares two [BsonValue](http://mongodb.github.io/mongo-java-driver/3.6/javadoc/org/bson/BsonValue.html) inputs and produces a [BsonArray](http://mongodb.github.io/mongo-java-driver/3.6/javadoc/org/bson/BsonArray.html) of the changes.
+- When used in combination with the HTTP PATCH method as per [RFC 5789 HTTP PATCH](https://datatracker.ietf.org/doc/html/rfc5789), it will do partial updates for HTTP APIs in a standard  way.
+- This library compares two [BsonValue](https://mongodb.github.io/mongo-java-driver/3.12/javadoc/org/bson/BsonValue.html) inputs and produces a [BsonArray](https://mongodb.github.io/mongo-java-driver/3.12/javadoc/org/bson/BsonArray.html) of the changes.
 
 
 ### Compatible with : Java 8 and above all versions
@@ -20,7 +21,7 @@ The code here was ported (copied, renamed, repackaged, modified) from the [zjson
 
 ### How to use:
 
-### Current Version : 0.4.9
+### Current Version : 0.4.12
 
 Add following to `<dependencies/>` section of your pom.xml -
 
@@ -28,7 +29,7 @@ Add following to `<dependencies/>` section of your pom.xml -
 <dependency>
   <groupId>com.ebay.bsonpatch</groupId>
   <artifactId>bsonpatch</artifactId>
-  <version>0.4.9</version>
+  <version>0.4.12</version>
 </dependency>
 ```
 
@@ -42,7 +43,7 @@ Computes and returns a JSON `patch` (as a BsonArray) from `source`  to `target`,
 Both `source` and `target` must be either valid BSON objects or arrays or values. 
 Further, if resultant `patch` is applied to `source`, it will yield `target`.
 
-The algorithm which computes this JsonPatch currently generates following operations as per [RFC 6902](https://tools.ietf.org/html/rfc6902) -  
+The algorithm which computes this JsonPatch currently generates following operations as per [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902#section-4) -  
  - `add`
  - `remove`
  - `replace`
