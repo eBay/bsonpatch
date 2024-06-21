@@ -142,7 +142,7 @@
 		<dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.3</version>
+            <version>4.4</version>
         </dependency>
        	<!-- For IOUtils.toString(inputStream, charset) and StringBuilderWriter -->
 		<dependency>
