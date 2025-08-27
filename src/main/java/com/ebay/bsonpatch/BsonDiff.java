@@ -19,18 +19,13 @@
 
 package com.ebay.bsonpatch;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.collections4.ListUtils;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.bson.BsonValue;
+
+import java.util.*;
 
 
 public final class BsonDiff {
@@ -266,7 +261,7 @@ public final class BsonDiff {
             int value = counters.get(i);
             if (value != 0) {
                 int currValue = tokens.get(i).getIndex();
-                tokens.set(i, new JsonPointer.RefToken(Integer.toString(currValue + value)));
+                tokens.set(i, JsonPointer.RefToken.parse(Integer.toString(currValue + value)));
             }
         }
         return new JsonPointer(tokens);

@@ -19,23 +19,33 @@
 
 package com.ebay.bsonpatch;
 
-import static com.ebay.bsonpatch.InPlaceApplyProcessor.cloneBsonValue;
+import org.bson.BsonArray;
+import org.bson.BsonNull;
+import org.bson.BsonValue;
 
 import java.util.EnumSet;
 import java.util.Iterator;
 
-import org.bson.BsonArray;
-import org.bson.BsonNull;
-import org.bson.BsonValue;
+import static com.ebay.bsonpatch.InPlaceApplyProcessor.cloneBsonValue;
 
 public final class BsonPatch {
 
     private BsonPatch() {}
 
+    private static BsonValue getPatchStringAttr(BsonValue bsonNode, String attr) {
+        BsonValue child = getPatchAttr(bsonNode, attr);
+
+        if (!child.isString())
+            throw new InvalidBsonPatchException("Invalid JSON Patch payload (non-text '" + attr + "' field)");
+
+        return child;
+    }
+
     private static BsonValue getPatchAttr(BsonValue bsonNode, String attr) {
     	BsonValue child = bsonNode.asDocument().get(attr);
         if (child == null)
             throw new InvalidBsonPatchException("Invalid BSON Patch payload (missing '" + attr + "' field)");
+
         return child;
     }
 
@@ -54,8 +64,8 @@ public final class BsonPatch {
         while (operations.hasNext()) {
         	BsonValue bsonNode = operations.next();
             if (!bsonNode.isDocument()) throw new InvalidBsonPatchException("Invalid BSON Patch payload (not an object)");
-            Operation operation = Operation.fromRfcName(getPatchAttr(bsonNode, Constants.OP).asString().getValue().replaceAll("\"", ""));
-            JsonPointer path = JsonPointer.parse(getPatchAttr(bsonNode, Constants.PATH).asString().getValue());
+            Operation operation = Operation.fromRfcName(getPatchStringAttr(bsonNode, Constants.OP).asString().getValue().replaceAll("\"", ""));
+            JsonPointer path = JsonPointer.parse(getPatchStringAttr(bsonNode, Constants.PATH).asString().getValue());
 
             try {
 	            switch (operation) {
@@ -85,13 +95,13 @@ public final class BsonPatch {
 		            }
 		
 		            case MOVE: {
-		                JsonPointer fromPath = JsonPointer.parse(getPatchAttr(bsonNode, Constants.FROM).asString().getValue());
+		                JsonPointer fromPath = JsonPointer.parse(getPatchStringAttr(bsonNode, Constants.FROM).asString().getValue());
 		                processor.move(fromPath, path);
 		                break;
 		            }
 		
 		            case COPY: {
-		                JsonPointer fromPath = JsonPointer.parse(getPatchAttr(bsonNode, Constants.FROM).asString().getValue());
+		                JsonPointer fromPath = JsonPointer.parse(getPatchStringAttr(bsonNode, Constants.FROM).asString().getValue());
 		                processor.copy(fromPath, path);
 		                break;
 		            }

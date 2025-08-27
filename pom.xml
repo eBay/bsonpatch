@@ -4,29 +4,25 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.ebay.bsonpatch</groupId>
+	<groupId>io.github.dandoug</groupId>
 	<artifactId>bsonpatch</artifactId>
-	<version>0.4.12</version>
+	<version>0.5.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Java Library to find / apply JSON Patches according to RFC 6902 against BsonValues</description>
-	<url>https://github.com/ebay/bsonpatch/</url>
-	
-	<scm>
-		<connection>scm:git:git://github.com/eBay/bsonpatch.git</connection>
-		<developerConnection>scm:git:ssh://github.com/eBay/bsonpatch.git</developerConnection>
-		<url>https://github.com/ebay/bsonpatch</url>
-		<tag>HEAD</tag>
-	</scm>
+	<url>https://github.com/dandoug/bsonpatch/</url>
+
+    <scm>
+        <connection>scm:git:git://github.com/dandoug/bsonpatch.git</connection>
+        <developerConnection>scm:git:ssh://github.com:dandoug/bsonpatch.git</developerConnection>
+        <url>https://github.com/dandoug/bsonpatch/tree/master</url>
+    </scm>
 	
 	<developers>
 		<developer>
 			<id>dandoug</id>
 			<name>Dan Douglas</name>
-			<email>ddouglas@skibums.org</email>
-			<organization>eBay</organization>
-			<organizationUrl>https://www.ebay.com</organizationUrl>
 		</developer>
 	</developers>
 	
@@ -40,6 +36,9 @@
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <compileSource>1.8</compileSource>
+        <testCompileSource>1.8</testCompileSource>
+        <junitVersion>5.13.4</junitVersion>
 	</properties>
 	
 	<build>
@@ -47,7 +46,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
+				<version>3.14.0</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -61,7 +60,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.2.1</version>
+				<version>3.3.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -137,25 +136,32 @@
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
-			<version>3.12.10</version>
+			<version>3.12.14</version>
 		</dependency>
+
 		<dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.3</version>
+            <version>4.5.0</version>
+            <scope>test</scope>
         </dependency>
-       	<!-- For IOUtils.toString(inputStream, charset) and StringBuilderWriter -->
 		<dependency>
-			<scope>test</scope>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.7</version>
+			<version>2.20.0</version>
+            <scope>test</scope>
 		</dependency>
-		<dependency>
-			<scope>test</scope>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
-		</dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junitVersion}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junitVersion}</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 </project>

@@ -1,14 +1,14 @@
 package com.ebay.bsonpatch;
 
-import java.io.IOException;
-import java.util.EnumSet;
-
-import static org.junit.Assert.*;
-
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonValue;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.EnumSet;
+
+import static org.junit.Assert.assertEquals;
 
 public class TestNodesEmissionTest {
 

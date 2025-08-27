@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-enum Operation {
+public enum Operation {
     ADD("add"),
     REMOVE("remove"),
     REPLACE("replace"),

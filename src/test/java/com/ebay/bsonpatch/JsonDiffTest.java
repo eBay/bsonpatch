@@ -19,6 +19,12 @@
 
 package com.ebay.bsonpatch;
 
+import org.apache.commons.io.IOUtils;
+import org.bson.*;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -26,16 +32,6 @@ import java.util.EnumSet;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
-
-import org.apache.commons.io.IOUtils;
-import org.bson.BsonArray;
-import org.bson.BsonDocument;
-import org.bson.BsonInt32;
-import org.bson.BsonString;
-import org.bson.BsonValue;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class JsonDiffTest {
     private static BsonArray jsonNode;

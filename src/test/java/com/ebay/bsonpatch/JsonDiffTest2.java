@@ -19,18 +19,18 @@
 
 package com.ebay.bsonpatch;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.apache.commons.io.IOUtils;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonValue;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 public class JsonDiffTest2 {
     private static BsonArray jsonNode;
@@ -54,7 +54,7 @@ public class JsonDiffTest2 {
             String message = node.containsKey("message") ? node.getString("message").getValue() : "";
             BsonValue secondPrime = BsonPatch.apply(patch, first);
 
-            Assert.assertThat(message, secondPrime, equalTo(second));
+            assertThat(message, secondPrime, equalTo(second));
         }
 
     }

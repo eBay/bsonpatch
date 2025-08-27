@@ -19,13 +19,13 @@
 
 package com.ebay.bsonpatch;
 
+import org.bson.BsonDocument;
+import org.bson.BsonValue;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.bson.BsonDocument;
-import org.bson.BsonValue;
 
 public class PatchTestCase {
 
@@ -72,5 +72,10 @@ public class PatchTestCase {
     private static boolean isEnabled(BsonValue node) {
     	BsonValue disabled = node.asDocument().get("disabled");
         return (disabled == null || !disabled.asBoolean().getValue());
+    }
+
+    public boolean isApplyInPlaceSupported() {
+        BsonValue allowInPlace = node.get("allowInPlace");
+        return (allowInPlace == null || allowInPlace.asBoolean().getValue());
     }
 }

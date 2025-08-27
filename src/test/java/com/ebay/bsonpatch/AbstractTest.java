@@ -19,15 +19,6 @@
 
 package com.ebay.bsonpatch;
 
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
@@ -37,6 +28,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
 public abstract class AbstractTest {
@@ -51,15 +51,24 @@ public abstract class AbstractTest {
     }
 
     @Test
-    public void test() throws Exception {
+    public void testApply() throws Exception {
         if (p.isOperation()) {
-            testOperation();
+            testOperation(false);
         } else {
-            testError();
+            testError(false);
         }
     }
 
-    private void testOperation() throws Exception {
+    @Test
+    public void testApplyInPlace() throws Exception {
+        if (p.isOperation() && p.isApplyInPlaceSupported()) {
+            testOperation(true);
+        } else {
+            testError(true);
+        }
+    }
+
+    private void testOperation(boolean inPlace) throws Exception {
         BsonDocument node = p.getNode();
 
         BsonValue doc = node.get("node");
@@ -67,7 +76,13 @@ public abstract class AbstractTest {
         BsonArray patch = node.getArray("op");
         String message = node.containsKey("message") ? node.getString("message").getValue() : "";
 
-        BsonValue result = BsonPatch.apply(patch, doc);
+        BsonValue result;
+        if (inPlace) {
+            result = CopyingApplyProcessor.deepCopy(doc);
+            BsonPatch.applyInPlace(patch, result);
+        } else {
+            result = BsonPatch.apply(patch, doc);
+        }
         String failMessage = "The following test failed: \n" +
              "message: " + message + '\n' +
              "at: " + p.getSourceFile();
@@ -97,7 +112,7 @@ public abstract class AbstractTest {
         return res.toString();
     }
 
-    private void testError() throws  ClassNotFoundException {
+    private void testError(boolean inPlace) throws  ClassNotFoundException {
         BsonDocument node = p.getNode();
         BsonValue first = node.get("node");
         BsonArray patch = node.getArray("op");
@@ -106,8 +121,12 @@ public abstract class AbstractTest {
                 node.containsKey("type") ? exceptionType(node.getString("type").getValue()) : BsonPatchApplicationException.class;
 
         try {
-            BsonPatch.apply(patch, first);
-
+            if (inPlace) {
+                BsonValue target = CopyingApplyProcessor.deepCopy(first);
+                BsonPatch.applyInPlace(patch, target);
+            } else {
+                BsonPatch.apply(patch, first);
+            }
             fail(errorMessage("Failure expected: " + message));
         } catch (Exception e) {
             if (matchOnErrors()) {
@@ -118,7 +137,7 @@ public abstract class AbstractTest {
                         errorMessage("Operation failed but with wrong exception type", e),
                         e,
                         instanceOf(type));
-                if (message != null) {
+                if (!message.isEmpty()) {
                     assertThat(
                             errorMessage("Operation failed but with wrong message", e),
                             e.toString(),

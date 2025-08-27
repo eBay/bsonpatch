@@ -19,14 +19,14 @@
 
 package com.ebay.bsonpatch;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonInt32;
 import org.bson.BsonString;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class TestDataGenerator {
     private static Random random = new Random();

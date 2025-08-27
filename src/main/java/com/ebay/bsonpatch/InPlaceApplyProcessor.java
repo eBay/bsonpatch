@@ -19,13 +19,9 @@
 
 package com.ebay.bsonpatch;
 
-import java.util.EnumSet;
+import org.bson.*;
 
-import org.bson.BsonArray;
-import org.bson.BsonBinary;
-import org.bson.BsonDocument;
-import org.bson.BsonJavaScriptWithScope;
-import org.bson.BsonValue;
+import java.util.EnumSet;
 
 class InPlaceApplyProcessor implements BsonPatchProcessor {
 
@@ -43,6 +39,10 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
 
     public BsonValue result() {
         return target;
+    }
+
+    protected boolean allowRootReplacement() {
+        return false;
     }
 
     @Override
@@ -95,6 +95,8 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
     @Override
     public void replace(JsonPointer path, BsonValue value) throws JsonPointerEvaluationException {
         if (path.isRoot()) {
+            if (!allowRootReplacement())
+                throw new BsonPatchApplicationException("Cannot replace root document", Operation.REPLACE, path);
             target = value;
             return;
         }
@@ -170,17 +172,19 @@ class InPlaceApplyProcessor implements BsonPatchProcessor {
     }
     
     private void set(JsonPointer path, BsonValue value, Operation forOp) throws JsonPointerEvaluationException {
-        if (path.isRoot())
+        if (path.isRoot()) {
+            if (!allowRootReplacement())
+                throw new BsonPatchApplicationException("Cannot replace root document", forOp, path);
             target = value;
-        else {
-        	BsonValue parentNode = path.getParent().evaluate(target);
-            if (!parentNode.isDocument() && !parentNode.isArray())
-                throw new BsonPatchApplicationException("Cannot reference past scalar value", forOp, path.getParent());
-            else if (parentNode.isArray())
-                addToArray(path, value, parentNode);
-            else
-                addToObject(path, parentNode, value);
+            return;
         }
+        BsonValue parentNode = path.getParent().evaluate(target);
+        if (parentNode.getBsonType() != BsonType.DOCUMENT && parentNode.getBsonType() != BsonType.ARRAY)
+            throw new BsonPatchApplicationException("Cannot reference past scalar value", forOp, path.getParent());
+        else if (parentNode.isArray())
+            addToArray(path, value, parentNode);
+        else
+            addToObject(path, parentNode, value);
     }    
 
     private void addToObject(JsonPointer path, BsonValue node, BsonValue value) {

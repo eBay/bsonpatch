@@ -19,16 +19,16 @@
 
 package com.ebay.bsonpatch;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.bson.BsonArray;
+import org.bson.BsonDocument;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.EnumSet;
 
-import org.bson.BsonArray;
-import org.bson.BsonDocument;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class ApiTest {
 

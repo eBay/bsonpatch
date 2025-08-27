@@ -8,11 +8,11 @@ The following guidelines apply to all contributors.
 
 ### Making Changes
 
-* Fork the `monstor-cdc/bsonpatch` repository
+* Fork the `bsonpatch/bsonpatch` repository
 * Make your changes and push them to a topic branch in your fork
   * See our commit message guidelines further down in this document
-* Submit a pull request to the `monstor-cdc/bsonpatch` repository
-* Update `monstor-cdc/bsonpatch` GITHUB issue with the generated pull request link
+* Submit a pull request to the `bsonpatch/bsonpatch` repository
+* Update `bsonpatch/bsonpatch` GITHUB issue with the generated pull request link
 
 ### General Guidelines
 
@@ -34,7 +34,7 @@ The following guidelines apply to all contributors.
 * The first line should be limited to 50 characters and should not end in a
   period.
 * Subsequent lines should be wrapped at 72 characters.
-* Put `Closes: https://github.com/eBay/bsonpatch/issues/XXX` line at the very
+* Put `Closes: https://github.com/bsonpatch/bsonpatch/issues/XXX` line at the very
   end (where `XXX` is the actual issue number) if the proposed change is relevant to a tracked issue.
 
 Note: In Git commits the first line of the commit message has special

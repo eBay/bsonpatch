@@ -19,10 +19,10 @@
 
 package com.ebay.bsonpatch;
 
+import org.junit.runners.Parameterized;
+
 import java.io.IOException;
 import java.util.Collection;
-
-import org.junit.runners.Parameterized;
 
 public class CopyOperationTest extends AbstractTest {
 
