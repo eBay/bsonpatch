@@ -1,0 +1,104 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *  
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package io.github.bsonpatch;
+
+import org.bson.BsonArray;
+import org.bson.BsonDocument;
+import org.bson.BsonValue;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.EnumSet;
+
+import static io.github.bsonpatch.CompatibilityFlags.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
+
+public class CompatibilityTest {
+
+    BsonArray addNodeWithMissingValue;
+    BsonArray replaceNodeWithMissingValue;
+    BsonArray removeNoneExistingArrayElement;
+    BsonArray replaceNode;
+    BsonArray removeNode;
+
+    @Before
+    public void setUp() throws Exception {
+    	addNodeWithMissingValue = BsonArray.parse("[{\"op\":\"add\",\"path\":\"/a\"}]");
+        replaceNodeWithMissingValue = BsonArray.parse("[{\"op\":\"replace\",\"path\":\"/a\"}]");
+        removeNoneExistingArrayElement = BsonArray.parse("[{\"op\": \"remove\",\"path\": \"/b/0\"}]");
+        replaceNode = BsonArray.parse("[{\"op\":\"replace\",\"path\":\"/a\",\"value\":true}]");
+        removeNode = BsonArray.parse("[{\"op\":\"remove\",\"path\":\"/b\"}]");
+    }
+
+    @Test
+    public void withFlagAddShouldTreatMissingValuesAsNulls() throws IOException {
+        BsonDocument expected = BsonDocument.parse("{\"a\":null}");
+        BsonDocument result = BsonPatch.apply(addNodeWithMissingValue, new BsonDocument(), EnumSet.of(MISSING_VALUES_AS_NULLS)).asDocument();
+        assertThat(result, equalTo(expected));
+    }
+
+    @Test
+    public void withFlagAddNodeWithMissingValueShouldValidateCorrectly() {
+        BsonPatch.validate(addNodeWithMissingValue, EnumSet.of(MISSING_VALUES_AS_NULLS));
+    }
+
+    @Test
+    public void withFlagReplaceShouldTreatMissingValuesAsNull() throws IOException {
+    	BsonDocument source = BsonDocument.parse("{\"a\":\"test\"}");
+    	BsonDocument expected = BsonDocument.parse("{\"a\":null}");
+    	BsonDocument result = BsonPatch.apply(replaceNodeWithMissingValue, source, EnumSet.of(MISSING_VALUES_AS_NULLS)).asDocument();
+        assertThat(result, equalTo(expected));
+    }
+
+    @Test
+    public void withFlagReplaceNodeWithMissingValueShouldValidateCorrectly() {
+        BsonPatch.validate(addNodeWithMissingValue, EnumSet.of(MISSING_VALUES_AS_NULLS));
+    }
+    
+    @Test
+    public void withFlagIgnoreRemoveNoneExistingArrayElement() throws IOException {
+    	BsonDocument source = BsonDocument.parse("{\"b\": []}");
+    	BsonDocument expected = BsonDocument.parse("{\"b\": []}");
+    	BsonDocument result = BsonPatch.apply(removeNoneExistingArrayElement, source, EnumSet.of(REMOVE_NONE_EXISTING_ARRAY_ELEMENT)).asDocument();
+    	assertThat(result, equalTo(expected));
+     }
+    
+    @Test
+    public void withFlagReplaceShouldAddValueWhenMissingInTarget() throws Exception {
+    	BsonDocument expected = BsonDocument.parse("{\"a\": true}");
+    	BsonDocument result = BsonPatch.apply(replaceNode, BsonDocument.parse("{}"), EnumSet.of(ALLOW_MISSING_TARGET_OBJECT_ON_REPLACE)).asDocument();
+        assertThat(result, equalTo(expected));
+    }
+
+    @Test(expected = BsonPatchApplicationException.class)
+    public void withFlagRemoveMissingValueShouldThrow() throws Exception {
+        BsonDocument source = BsonDocument.parse("{\"a\": true}");
+        BsonPatch.apply(removeNode, source, EnumSet.of(FORBID_REMOVE_MISSING_OBJECT));
+    }
+
+    @Test
+    public void withFlagRemoveShouldRemove() throws Exception {
+        BsonDocument source = BsonDocument.parse("{\"b\": true}");
+        BsonDocument expected = BsonDocument.parse("{}");
+        BsonValue result = BsonPatch.apply(removeNode, source, EnumSet.of(FORBID_REMOVE_MISSING_OBJECT));
+        assertThat(result, equalTo(expected));
+    }}
