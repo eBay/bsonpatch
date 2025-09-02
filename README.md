@@ -4,6 +4,9 @@ This [JSON Patch](http://jsonpatch.com) implementation works directly with [BSON
 
 The code here was ported (copied, renamed, repackaged, modified) from the [zjsonpatch project](https://github.com/flipkart-incubator/zjsonpatch).
 
+<h2 style="color: #B52136;"><em><strong>End Of Life Notice - 2025-09-01</strong></em></h2>
+<p style="background-color: rgb(234,226,222); color: #000000;">This project is no longer maintained.  The last update was version 0.4.12 on April 18, 2022. A fork of this project is available at <a href="https://github.com/bsonpatch/bsonpatch"><b>bsonpatch/bsonpatch</b></a>.  That fork is actively maintained, has been repackaged with <code style="color: #ff6f00; font-weight: bold;">&lt;groupId&gt;io.github.bsonpatch&lt;/groupId&gt;</code>, and is available on Maven Central.  New use cases are encouraged to use the new fork, and current users are encouraged to migrate to the new fork.</p>
+
 ## Description & Use-Cases
 - Java Library to find / apply JSON Patches according to [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902).
 - JSON Patch defines a JSON document structure for representing changes to a JSON document.
